@@ -9,8 +9,17 @@ return new class extends Migration {
     {
         Schema::create('candidatures', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('offre_id')->constrained('offres')->onDelete('cascade');
+
+            $table->foreignId('student_id')
+                  ->constrained('users')
+                  ->onDelete('cascade');
+
+            $table->foreignId('offre_id')
+                  ->constrained('offres')
+                  ->onDelete('cascade');
+
+            $table->unique(['student_id', 'offre_id']);
+
             $table->string('cv');
             $table->enum('statut', ['en_attente', 'accepte', 'refuse']);
             $table->date('date_candidature');

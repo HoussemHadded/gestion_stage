@@ -10,8 +10,21 @@ class Offre extends Model
     use HasFactory;
 
     protected $fillable = [
-        'titre', 'description', 'date_publication', 'entreprise_id'
+        'titre',
+        'description',
+        'date_publication',
+        'entreprise_id'
     ];
+
+    protected $casts = [
+        'date_publication' => 'date',
+    ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
 
     // An Offre belongs to one Entreprise
     public function entreprise()

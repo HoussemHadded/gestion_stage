@@ -9,55 +9,74 @@ use App\Models\Offre;
 
 class CandidatureController extends Controller
 {
-    public function index() {
-        $candidatures = Candidature::with(['student', 'offre'])->get();
+    public function index()
+    {
+        $candidatures = Candidature::with(['student', 'offre.entreprise'])->get();
         return view('candidatures.index', compact('candidatures'));
     }
 
-    public function create() {
+    public function create()
+    {
         $students = User::where('role', 'student')->get();
         $offres = Offre::all();
+
         return view('candidatures.create', compact('students', 'offres'));
     }
 
-    public function store(Request $request) {
-        $request->validate([
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
             'student_id' => 'required|exists:users,id',
             'offre_id' => 'required|exists:offres,id',
-            'cv' => 'required',
+            'cv' => 'required|string',
             'statut' => 'required|in:en_attente,accepte,refuse',
             'date_candidature' => 'required|date'
         ]);
 
-        Candidature::create($request->all());
-        return redirect()->route('candidatures.index')->with('success', 'Candidature created successfully');
+        // Extra sécurité : vérifier rôle student
+        $student = User::where('id', $validated['student_id'])
+                       ->where('role', 'student')
+                       ->firstOrFail();
+
+        Candidature::create($validated);
+
+        return redirect()->route('candidatures.index')
+                         ->with('success', 'Candidature created successfully');
     }
 
-    public function edit($id) {
+    public function edit($id)
+    {
         $candidature = Candidature::findOrFail($id);
         $students = User::where('role', 'student')->get();
         $offres = Offre::all();
+
         return view('candidatures.edit', compact('candidature', 'students', 'offres'));
     }
 
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id)
+    {
         $candidature = Candidature::findOrFail($id);
 
-        $request->validate([
+        $validated = $request->validate([
             'student_id' => 'required|exists:users,id',
             'offre_id' => 'required|exists:offres,id',
-            'cv' => 'required',
+            'cv' => 'required|string',
             'statut' => 'required|in:en_attente,accepte,refuse',
             'date_candidature' => 'required|date'
         ]);
 
-        $candidature->update($request->all());
-        return redirect()->route('candidatures.index')->with('success', 'Candidature updated successfully');
+        $candidature->update($validated);
+
+        return redirect()->route('candidatures.index')
+                         ->with('success', 'Candidature updated successfully');
     }
 
-    public function destroy($id) {
+    public function destroy($id)
+    {
         $candidature = Candidature::findOrFail($id);
         $candidature->delete();
-        return redirect()->route('candidatures.index')->with('success', 'Candidature deleted successfully');
+
+        return redirect()->route('candidatures.index')
+                         ->with('success', 'Candidature deleted successfully');
     }
 }

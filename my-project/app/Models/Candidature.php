@@ -10,8 +10,22 @@ class Candidature extends Model
     use HasFactory;
 
     protected $fillable = [
-        'student_id', 'offre_id', 'cv', 'statut', 'date_candidature'
+        'student_id',
+        'offre_id',
+        'cv',
+        'statut',
+        'date_candidature'
     ];
+
+    protected $casts = [
+        'date_candidature' => 'date',
+    ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
 
     // A Candidature belongs to one Student
     public function student()

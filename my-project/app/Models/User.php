@@ -11,12 +11,24 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $fillable = [
-        'name', 'email', 'password', 'role', 'company_name', 'company_address'
+        'name',
+        'email',
+        'password',
+        'role',
+        'company_name',
+        'company_address'
     ];
 
     protected $hidden = [
         'password',
+        'remember_token',
     ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
 
     // One Entreprise has many Offres
     public function offres()
@@ -28,5 +40,26 @@ class User extends Authenticatable
     public function candidatures()
     {
         return $this->hasMany(Candidature::class, 'student_id');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Role Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isStudent()
+    {
+        return $this->role === 'student';
+    }
+
+    public function isEntreprise()
+    {
+        return $this->role === 'entreprise';
     }
 }
