@@ -73,7 +73,7 @@
 {{-- Pagination --}}
 @if($offres->hasPages())
     <div class="d-flex justify-content-center mt-4">
-        {{ $offres->links() }}
+        {{ $offres->appends(request()->query())->links() }}
     </div>
 @endif
 @endsection

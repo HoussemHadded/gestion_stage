@@ -51,7 +51,8 @@
                         @enderror
                     </div>
 
-                    {{-- Entreprise --}}
+                    {{-- Entreprise (visible uniquement pour l'admin) --}}
+                    @if(auth()->user()->role === 'admin')
                     <div class="mb-3">
                         <label for="entreprise_id" class="form-label">Entreprise <span class="text-danger">*</span></label>
                         <select name="entreprise_id" id="entreprise_id"
@@ -68,6 +69,7 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+                    @endif
 
                     <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-primary btn-lg">

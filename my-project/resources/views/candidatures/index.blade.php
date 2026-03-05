@@ -13,6 +13,35 @@
     @endif
 </div>
 
+{{-- Filtre par statut --}}
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ route('candidatures.index') }}" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="statut" class="form-label fw-semibold">
+                    <i class="bi bi-funnel me-1"></i>Filtrer par statut
+                </label>
+                <select name="statut" id="statut" class="form-select">
+                    <option value="">-- Tous les statuts --</option>
+                    <option value="en_attente" {{ request('statut') === 'en_attente' ? 'selected' : '' }}>En attente</option>
+                    <option value="accepte" {{ request('statut') === 'accepte' ? 'selected' : '' }}>Accepté</option>
+                    <option value="refuse" {{ request('statut') === 'refuse' ? 'selected' : '' }}>Refusé</option>
+                </select>
+            </div>
+            <div class="col-md-auto">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search me-1"></i>Filtrer
+                </button>
+                @if(request('statut'))
+                    <a href="{{ route('candidatures.index') }}" class="btn btn-outline-secondary ms-2">
+                        <i class="bi bi-x-circle me-1"></i>Réinitialiser
+                    </a>
+                @endif
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="card shadow-sm">
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -85,7 +114,7 @@
 {{-- Pagination --}}
 @if($candidatures->hasPages())
     <div class="d-flex justify-content-center mt-4">
-        {{ $candidatures->links() }}
+        {{ $candidatures->appends(request()->query())->links() }}
     </div>
 @endif
 @endsection

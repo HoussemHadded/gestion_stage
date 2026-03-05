@@ -24,29 +24,39 @@ class OffreController extends Controller
 
     public function create()
     {
-        // Si admin crée l'offre, il choisit l'entreprise
-        $entreprises = User::where('role', 'entreprise')->get();
+        // Seul l'admin choisit l'entreprise ; l'entreprise est auto-assignée
+        $entreprises = collect();
+        if (auth()->user()->role === 'admin') {
+            $entreprises = User::where('role', 'entreprise')->get();
+        }
+
         return view('offres.create', compact('entreprises'));
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'titre' => 'required|string|max:255',
-            'description' => 'required|string',
+        $rules = [
+            'titre'            => 'required|string|max:255',
+            'description'      => 'required|string',
             'date_publication' => 'required|date',
-            'entreprise_id' => 'required|exists:users,id'
-        ]);
+        ];
 
-        // Vérifier que entreprise_id est bien une entreprise
-        $entreprise = User::where('id', $validated['entreprise_id'])
-                           ->where('role', 'entreprise')
-                           ->firstOrFail();
+        // Seul l'admin doit choisir l'entreprise
+        if (auth()->user()->role === 'admin') {
+            $rules['entreprise_id'] = 'required|exists:users,id';
+        }
+
+        $validated = $request->validate($rules);
+
+        // Auto-assigner entreprise_id pour le rôle entreprise
+        if (auth()->user()->role === 'entreprise') {
+            $validated['entreprise_id'] = auth()->id();
+        }
 
         Offre::create($validated);
 
         return redirect()->route('offres.index')
-                         ->with('success', 'Offre created successfully');
+                         ->with('success', 'Offre créée avec succès.');
     }
 
     public function edit($id)

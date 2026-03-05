@@ -18,24 +18,6 @@
                 <form action="{{ route('candidatures.store') }}" method="POST">
                     @csrf
 
-                    {{-- Étudiant --}}
-                    <div class="mb-3">
-                        <label for="student_id" class="form-label">Étudiant <span class="text-danger">*</span></label>
-                        <select name="student_id" id="student_id"
-                                class="form-select @error('student_id') is-invalid @enderror" required>
-                            <option value="">-- Sélectionner un étudiant --</option>
-                            @foreach($students as $student)
-                                <option value="{{ $student->id }}"
-                                    {{ old('student_id') == $student->id ? 'selected' : '' }}>
-                                    {{ $student->name }} ({{ $student->email }})
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('student_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
                     {{-- Offre --}}
                     <div class="mb-3">
                         <label for="offre_id" class="form-label">Offre de stage <span class="text-danger">*</span></label>
@@ -62,31 +44,6 @@
                                   placeholder="Décrivez votre parcours, compétences et motivations..."
                                   required>{{ old('cv') }}</textarea>
                         @error('cv')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    {{-- Statut --}}
-                    <div class="mb-3">
-                        <label for="statut" class="form-label">Statut <span class="text-danger">*</span></label>
-                        <select name="statut" id="statut"
-                                class="form-select @error('statut') is-invalid @enderror" required>
-                            <option value="en_attente" {{ old('statut', 'en_attente') === 'en_attente' ? 'selected' : '' }}>En attente</option>
-                            <option value="accepte" {{ old('statut') === 'accepte' ? 'selected' : '' }}>Accepté</option>
-                            <option value="refuse" {{ old('statut') === 'refuse' ? 'selected' : '' }}>Refusé</option>
-                        </select>
-                        @error('statut')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    {{-- Date de candidature --}}
-                    <div class="mb-3">
-                        <label for="date_candidature" class="form-label">Date de candidature <span class="text-danger">*</span></label>
-                        <input type="date" name="date_candidature" id="date_candidature"
-                               class="form-control @error('date_candidature') is-invalid @enderror"
-                               value="{{ old('date_candidature', date('Y-m-d')) }}" required>
-                        @error('date_candidature')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>

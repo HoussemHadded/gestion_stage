@@ -19,7 +19,8 @@
                     @csrf
                     @method('PUT')
 
-                    {{-- Étudiant --}}
+                    {{-- Étudiant (visible uniquement pour l'admin) --}}
+                    @if(auth()->user()->role === 'admin')
                     <div class="mb-3">
                         <label for="student_id" class="form-label">Étudiant <span class="text-danger">*</span></label>
                         <select name="student_id" id="student_id"
@@ -36,6 +37,7 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+                    @endif
 
                     {{-- Offre --}}
                     <div class="mb-3">
