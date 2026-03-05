@@ -5,15 +5,14 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\OffreController;
 use App\Http\Controllers\CandidatureController;
 
-// Home (publique)
 Route::get('/', function () {
     return view('welcome');
 });
 
 // -------------------------
-// USERS (admin seulement)
+// USERS (Admin)
 // -------------------------
-Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
@@ -23,25 +22,35 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 });
 
 // -------------------------
-// OFFRES (admin + entreprise)
+// OFFRES (Admin, Entreprise, Student)
 // -------------------------
-Route::middleware(['auth:sanctum', 'role:admin,entreprise'])->group(function () {
-    Route::get('/offres', [OffreController::class, 'index'])->name('offres.index');
-    Route::get('/offres/create', [OffreController::class, 'create'])->name('offres.create');
-    Route::post('/offres', [OffreController::class, 'store'])->name('offres.store');
-    Route::get('/offres/{id}/edit', [OffreController::class, 'edit'])->name('offres.edit');
-    Route::put('/offres/{id}', [OffreController::class, 'update'])->name('offres.update');
-    Route::delete('/offres/{id}', [OffreController::class, 'destroy'])->name('offres.destroy');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/offres', [OffreController::class, 'index'])->name('offres.index')->middleware('role:admin,entreprise,student');
+    
+    Route::middleware(['role:admin,entreprise'])->group(function () {
+        Route::get('/offres/create', [OffreController::class, 'create'])->name('offres.create');
+        Route::post('/offres', [OffreController::class, 'store'])->name('offres.store');
+        Route::get('/offres/{id}/edit', [OffreController::class, 'edit'])->name('offres.edit');
+        Route::put('/offres/{id}', [OffreController::class, 'update'])->name('offres.update');
+        Route::delete('/offres/{id}', [OffreController::class, 'destroy'])->name('offres.destroy');
+    });
 });
 
 // -------------------------
-// CANDIDATURES (admin + entreprise)
+// CANDIDATURES (Admin, Entreprise, Student)
 // -------------------------
-Route::middleware(['auth:sanctum', 'role:admin,entreprise'])->group(function () {
-    Route::get('/candidatures', [CandidatureController::class, 'index'])->name('candidatures.index');
-    Route::get('/candidatures/create', [CandidatureController::class, 'create'])->name('candidatures.create');
-    Route::post('/candidatures', [CandidatureController::class, 'store'])->name('candidatures.store');
-    Route::get('/candidatures/{id}/edit', [CandidatureController::class, 'edit'])->name('candidatures.edit');
-    Route::put('/candidatures/{id}', [CandidatureController::class, 'update'])->name('candidatures.update');
-    Route::delete('/candidatures/{id}', [CandidatureController::class, 'destroy'])->name('candidatures.destroy');
+Route::middleware(['auth'])->group(function () {
+    // Admin et Entreprise 
+    Route::middleware(['role:admin,entreprise'])->group(function () {
+        Route::get('/candidatures', [CandidatureController::class, 'index'])->name('candidatures.index');
+        Route::get('/candidatures/{id}/edit', [CandidatureController::class, 'edit'])->name('candidatures.edit');
+        Route::put('/candidatures/{id}', [CandidatureController::class, 'update'])->name('candidatures.update');
+        Route::delete('/candidatures/{id}', [CandidatureController::class, 'destroy'])->name('candidatures.destroy');
+    });
+
+    // Étudiants (Student)
+    Route::middleware(['role:student'])->group(function () {
+        Route::get('/candidatures/create', [CandidatureController::class, 'create'])->name('candidatures.create');
+        Route::post('/candidatures', [CandidatureController::class, 'store'])->name('candidatures.store');
+    });
 });

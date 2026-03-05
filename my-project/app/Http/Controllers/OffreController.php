@@ -8,12 +8,11 @@ use App\Models\User;
 
 class OffreController extends Controller
 {
-    // Appliquer middleware pour sécuriser l'accès
     public function __construct()
     {
         $this->middleware('auth');
-        // Exemple : seulement admin et entreprise peuvent créer/update/destroy
-        $this->middleware('role:admin,entreprise')->except(['index']);
+        $this->middleware('role:admin,entreprise,student')->only(['index']);
+        $this->middleware('role:admin,entreprise')->only(['create', 'store', 'edit', 'update', 'destroy']);
     }
 
     public function index()

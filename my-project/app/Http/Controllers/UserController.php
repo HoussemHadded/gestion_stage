@@ -8,11 +8,10 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    // Appliquer middleware pour sécuriser l'accès
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('role:admin'); // Seul admin peut gérer les users
+        $this->middleware('role:admin');
     }
 
     public function index()

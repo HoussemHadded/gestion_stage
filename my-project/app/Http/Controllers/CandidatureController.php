@@ -9,6 +9,12 @@ use App\Models\Offre;
 
 class CandidatureController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('role:admin,entreprise')->only(['index', 'edit', 'update', 'destroy']);
+        $this->middleware('role:student')->only(['create', 'store']);
+    }
     public function index()
     {
         $candidatures = Candidature::with(['student', 'offre.entreprise'])->get();

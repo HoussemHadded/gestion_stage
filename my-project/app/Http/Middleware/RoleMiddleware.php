@@ -9,10 +9,10 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, ...$roles)
     {
-        $user = auth()->user(); // récupère l'utilisateur connecté via Sanctum
+        $user = auth()->user();
         
         if (!$user || !in_array($user->role, $roles)) {
-            abort(403, "Accès interdit");
+            abort(403, "Accès interdit : Vous n'avez pas les droits nécessaires.");
         }
         
         return $next($request);
