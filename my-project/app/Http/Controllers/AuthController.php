@@ -4,54 +4,68 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class AuthController extends Controller
 {
+    /**
+     * POST /api/login
+     * Authentifie un utilisateur et retourne un token Sanctum.
+     */
     public function login(Request $request)
     {
+        // Validation des champs
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
+            'email'    => ['required', 'email'],
+            'password' => ['required', 'string'],
         ]);
 
+        // Vérifier les identifiants
         if (!Auth::attempt($credentials)) {
             return response()->json([
-                'message' => 'Invalid credentials'
+                'message' => 'Invalid credentials',
             ], 401);
         }
 
-        $request->session()->regenerate();
-
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // If request comes from API (expects JSON), return token
-        if ($request->expectsJson()) {
-            $token = $user->createToken('auth_token')->plainTextToken;
+        // Créer un token personnel Sanctum
+        $token = $user->createToken('postman')->plainTextToken;
 
-            return response()->json([
-                'user' => $user,
-                'token' => $token
-            ]);
-        }
-
-        // Otherwise it's web login
-        return redirect()->intended('/');
+        return response()->json([
+            'message'    => 'Login successful',
+            'token'      => $token,
+            'token_type' => 'Bearer',
+            'user'       => $user,
+        ], 200);
     }
 
+    /**
+     * POST /api/logout
+     * Supprime le token courant de l'utilisateur authentifié.
+     * Protégé par auth:sanctum.
+     */
     public function logout(Request $request)
     {
-        if ($request->expectsJson()) {
-            $request->user()->tokens()->delete();
+        // Révoquer le token utilisé pour cette requête
+        $request->user()->currentAccessToken()->delete();
 
-            return response()->json([
-                'message' => 'Logged out'
-            ]);
-        }
+        return response()->json([
+            'message' => 'Logged out successfully',
+        ], 200);
+    }
 
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect('/login');
+    /**
+     * GET /api/me
+     * Retourne les informations de l'utilisateur authentifié.
+     * Protégé par auth:sanctum.
+     */
+    public function me(Request $request)
+    {
+        return response()->json([
+            'user' => $request->user(),
+        ], 200);
     }
 }

@@ -18,7 +18,7 @@ class OffreController extends Controller
     public function index()
     {
         // Eager load entreprise
-        $offres = Offre::with('entreprise')->get();
+        $offres = Offre::with('entreprise')->paginate(10);
         return view('offres.index', compact('offres'));
     }
 

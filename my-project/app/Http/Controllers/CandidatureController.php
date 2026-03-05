@@ -17,7 +17,7 @@ class CandidatureController extends Controller
     }
     public function index()
     {
-        $candidatures = Candidature::with(['student', 'offre.entreprise'])->get();
+        $candidatures = Candidature::with(['student', 'offre.entreprise'])->paginate(10);
         return view('candidatures.index', compact('candidatures'));
     }
 
@@ -46,8 +46,8 @@ class CandidatureController extends Controller
 
         Candidature::create($validated);
 
-        return redirect()->route('candidatures.index')
-                         ->with('success', 'Candidature created successfully');
+        return redirect()->route('offres.index')
+                         ->with('success', 'Candidature soumise avec succès.');
     }
 
     public function edit($id)
