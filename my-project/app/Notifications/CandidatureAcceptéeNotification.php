@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\Candidature;
 
-class CandidatureAcceptéeNotification extends Notification
+class CandidatureAcceptéeNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

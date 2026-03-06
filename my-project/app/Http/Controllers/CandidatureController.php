@@ -9,6 +9,8 @@ use App\Models\Offre;
 use App\Notifications\NouvelleCandidatureNotification;
 use App\Notifications\CandidatureAcceptéeNotification;
 use App\Notifications\CandidatureRefuséeNotification;
+use App\Services\CacheService;
+use Illuminate\Support\Facades\Cache;
 
 class CandidatureController extends Controller
 {
@@ -21,20 +23,26 @@ class CandidatureController extends Controller
 
     public function index()
     {
-        $query = Candidature::with(['student', 'offre.entreprise']);
+        $page = request()->get('page', 1);
+        $statut = request('statut');
+        $cacheKey = 'candidatures_list_page_' . $page . '_statut_' . ($statut ?? 'all');
 
-        if (request('statut')) {
-            $query->where('statut', request('statut'));
-        }
-
-        $candidatures = $query->latest()->paginate(10);
+        $candidatures = Cache::remember($cacheKey, 300, function () use ($statut) {
+            $query = Candidature::with(['student', 'offre.entreprise']);
+            if ($statut) {
+                $query->where('statut', $statut);
+            }
+            return $query->latest()->paginate(10);
+        });
 
         return view('candidatures.index', compact('candidatures'));
     }
 
     public function create()
     {
-        $offres = Offre::all();
+        $offres = Cache::remember('offres_all_list', 300, function () {
+            return Offre::all();
+        });
 
         return view('candidatures.create', compact('offres'));
     }
@@ -57,6 +65,8 @@ class CandidatureController extends Controller
         $candidature->load('offre.entreprise');
         $candidature->offre->entreprise->notify(new NouvelleCandidatureNotification($candidature));
 
+        CacheService::forgetCandidatures();
+
         return redirect()->route('offres.index')
                          ->with('success', 'Candidature soumise avec succès.');
     }
@@ -64,8 +74,12 @@ class CandidatureController extends Controller
     public function edit($id)
     {
         $candidature = Candidature::findOrFail($id);
-        $students = User::where('role', 'student')->get();
-        $offres = Offre::all();
+        $students = Cache::remember('students_list', 300, function () {
+            return User::where('role', 'student')->get();
+        });
+        $offres = Cache::remember('offres_all_list', 300, function () {
+            return Offre::all();
+        });
 
         return view('candidatures.edit', compact('candidature', 'students', 'offres'));
     }
@@ -84,6 +98,8 @@ class CandidatureController extends Controller
 
         $candidature->update($validated);
 
+        CacheService::forgetCandidatures();
+
         return redirect()->route('candidatures.index')
                          ->with('success', 'Candidature mise à jour avec succès.');
     }
@@ -92,6 +108,8 @@ class CandidatureController extends Controller
     {
         $candidature = Candidature::findOrFail($id);
         $candidature->delete();
+
+        CacheService::forgetCandidatures();
 
         return redirect()->route('candidatures.index')
                          ->with('success', 'Candidature supprimée avec succès.');
@@ -116,6 +134,8 @@ class CandidatureController extends Controller
         } else {
             $student->notify(new CandidatureRefuséeNotification($candidature));
         }
+
+        CacheService::forgetCandidatures();
 
         return redirect()->route('candidatures.index')
                          ->with('success', 'Statut de la candidature mis à jour.');

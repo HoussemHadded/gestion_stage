@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Services\CacheService;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
 
 class UserController extends Controller
 {
@@ -16,7 +18,13 @@ class UserController extends Controller
 
     public function index()
     {
-        $users = User::paginate(10);
+        $page = request()->get('page', 1);
+        $cacheKey = 'users_list_page_' . $page;
+
+        $users = Cache::remember($cacheKey, 300, function () {
+            return User::paginate(10);
+        });
+
         return view('users.index', compact('users'));
     }
 
@@ -39,6 +47,8 @@ class UserController extends Controller
         $validated['password'] = Hash::make($validated['password']);
 
         User::create($validated);
+
+        CacheService::forgetUsers();
 
         return redirect()->route('users.index')
                          ->with('success', 'User created successfully');
@@ -71,6 +81,8 @@ class UserController extends Controller
 
         $user->update($validated);
 
+        CacheService::forgetUsers();
+
         return redirect()->route('users.index')
                          ->with('success', 'User updated successfully');
     }
@@ -79,6 +91,10 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $user->delete();
+
+        CacheService::forgetUsers();
+        CacheService::forgetOffres();
+        CacheService::forgetCandidatures();
 
         return redirect()->route('users.index')
                          ->with('success', 'User deleted successfully');

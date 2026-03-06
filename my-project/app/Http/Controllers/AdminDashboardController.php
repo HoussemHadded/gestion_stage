@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Offre;
 use App\Models\Candidature;
+use Illuminate\Support\Facades\Cache;
 
 class AdminDashboardController extends Controller
 {
@@ -18,38 +19,36 @@ class AdminDashboardController extends Controller
      */
     public function index()
     {
-        // Statistiques clés
-        $nbEtudiants = User::where('role', 'student')->count();
-        $nbEntreprises = User::where('role', 'entreprise')->count();
-        $nbOffresActives = Offre::count();
+        $cacheKey = 'admin_dashboard_stats';
+        $ttl = 300; // 5 minutes
 
-        // Candidatures par statut
-        $candidaturesByStatut = Candidature::selectRaw('statut, count(*) as total')
-            ->groupBy('statut')
-            ->pluck('total', 'statut')
-            ->toArray();
+        $data = Cache::remember($cacheKey, $ttl, function () {
+            $nbEtudiants = User::where('role', 'student')->count();
+            $nbEntreprises = User::where('role', 'entreprise')->count();
+            $nbOffresActives = Offre::count();
 
-        // Assurer que tous les statuts apparaissent même si 0
-        $statuts = ['en_attente', 'accepte', 'refuse'];
-        $labels = [
-            'en_attente' => 'En attente',
-            'accepte'    => 'Acceptées',
-            'refuse'     => 'Refusées',
-        ];
+            $candidaturesByStatut = Candidature::selectRaw('statut, count(*) as total')
+                ->groupBy('statut')
+                ->pluck('total', 'statut')
+                ->toArray();
 
-        $chartLabels = [];
-        $chartData = [];
-        foreach ($statuts as $statut) {
-            $chartLabels[] = $labels[$statut];
-            $chartData[] = $candidaturesByStatut[$statut] ?? 0;
-        }
+            $statuts = ['en_attente', 'accepte', 'refuse'];
+            $labels = [
+                'en_attente' => 'En attente',
+                'accepte'    => 'Acceptées',
+                'refuse'     => 'Refusées',
+            ];
 
-        return view('admin.dashboard', compact(
-            'nbEtudiants',
-            'nbEntreprises',
-            'nbOffresActives',
-            'chartLabels',
-            'chartData'
-        ));
+            $chartLabels = [];
+            $chartData = [];
+            foreach ($statuts as $statut) {
+                $chartLabels[] = $labels[$statut];
+                $chartData[] = $candidaturesByStatut[$statut] ?? 0;
+            }
+
+            return compact('nbEtudiants', 'nbEntreprises', 'nbOffresActives', 'chartLabels', 'chartData');
+        });
+
+        return view('admin.dashboard', $data);
     }
 }

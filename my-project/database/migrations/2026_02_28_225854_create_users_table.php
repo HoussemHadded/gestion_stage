@@ -11,10 +11,12 @@ return new class extends Migration {
             $table->id(); // id bigint PK
             $table->string('name');
             $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('role', ['admin', 'student', 'entreprise']);
             $table->string('company_name')->nullable(); // for entreprise
             $table->string('company_address')->nullable(); // for entreprise
+            $table->rememberToken();
             $table->timestamps(); // created_at & updated_at
         });
     }

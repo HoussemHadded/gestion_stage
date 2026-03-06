@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Offre;
 use App\Models\User;
+use App\Services\CacheService;
+use Illuminate\Support\Facades\Cache;
 
 class OffreController extends Controller
 {
@@ -17,17 +19,23 @@ class OffreController extends Controller
 
     public function index()
     {
-        // Eager load entreprise
-        $offres = Offre::with('entreprise')->paginate(10);
+        $page = request()->get('page', 1);
+        $cacheKey = 'offres_list_page_' . $page;
+
+        $offres = Cache::remember($cacheKey, 300, function () {
+            return Offre::with('entreprise')->paginate(10);
+        });
+
         return view('offres.index', compact('offres'));
     }
 
     public function create()
     {
-        // Seul l'admin choisit l'entreprise ; l'entreprise est auto-assignée
         $entreprises = collect();
         if (auth()->user()->role === 'admin') {
-            $entreprises = User::where('role', 'entreprise')->get();
+            $entreprises = Cache::remember('entreprises_list', 300, function () {
+                return User::where('role', 'entreprise')->get();
+            });
         }
 
         return view('offres.create', compact('entreprises'));
@@ -55,6 +63,8 @@ class OffreController extends Controller
 
         Offre::create($validated);
 
+        CacheService::forgetOffres();
+
         return redirect()->route('offres.index')
                          ->with('success', 'Offre créée avec succès.');
     }
@@ -62,7 +72,9 @@ class OffreController extends Controller
     public function edit($id)
     {
         $offre = Offre::findOrFail($id);
-        $entreprises = User::where('role', 'entreprise')->get();
+        $entreprises = Cache::remember('entreprises_list', 300, function () {
+            return User::where('role', 'entreprise')->get();
+        });
         return view('offres.edit', compact('offre', 'entreprises'));
     }
 
@@ -84,6 +96,8 @@ class OffreController extends Controller
 
         $offre->update($validated);
 
+        CacheService::forgetOffres();
+
         return redirect()->route('offres.index')
                          ->with('success', 'Offre updated successfully');
     }
@@ -92,6 +106,9 @@ class OffreController extends Controller
     {
         $offre = Offre::findOrFail($id);
         $offre->delete();
+
+        CacheService::forgetOffres();
+        CacheService::forgetCandidatures();
 
         return redirect()->route('offres.index')
                          ->with('success', 'Offre deleted successfully');
