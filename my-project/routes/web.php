@@ -45,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/candidatures', [CandidatureController::class, 'index'])->name('candidatures.index');
         Route::get('/candidatures/{id}/edit', [CandidatureController::class, 'edit'])->name('candidatures.edit');
         Route::put('/candidatures/{id}', [CandidatureController::class, 'update'])->name('candidatures.update');
+        Route::patch('/candidatures/{candidature}/statut', [CandidatureController::class, 'updateStatut'])->name('candidatures.updateStatut');
         Route::delete('/candidatures/{id}', [CandidatureController::class, 'destroy'])->name('candidatures.destroy');
     });
 
