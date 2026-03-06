@@ -53,6 +53,11 @@
                         {{-- Admin --}}
                         @if(auth()->user()->role === 'admin')
                             <li class="nav-item">
+                                <a class="nav-link" href="{{ route('admin.dashboard') }}">
+                                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" href="{{ route('users.index') }}">
                                     <i class="bi bi-people me-1"></i>Utilisateurs
                                 </a>
