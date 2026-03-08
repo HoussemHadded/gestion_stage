@@ -1,59 +1,98 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\OffreController;
-use App\Http\Controllers\CandidatureController;
-use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\Admin;
+use App\Http\Controllers\Student;
+use App\Http\Controllers\Company;
+use App\Http\Controllers\Entreprise;
+use App\Http\Controllers\Supervisor;
+use App\Http\Controllers\Auth;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return view('welcome');
+})->name('home');
+
+// -------------------------
+// AUTHENTICATION (Web)
+// -------------------------
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [Auth\LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [Auth\LoginController::class, 'login'])->middleware('throttle:10,1');
+
+    Route::get('/register', [Auth\RegisterController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/register', [Auth\RegisterController::class, 'register']);
+});
+
+Route::post('/logout', [Auth\LoginController::class, 'logout'])
+    ->middleware('auth')
+    ->name('logout');
+
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware('auth')
+    ->name('dashboard');
+
+// -------------------------
+// ADMIN ROUTES
+// -------------------------
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [Admin\DashboardController::class, 'index'])->name('admin.dashboard');
+
+    // User Management
+    Route::get('/users',              [Admin\UserController::class, 'index'])->name('users.index');
+    Route::get('/users/create',       [Admin\UserController::class, 'create'])->name('users.create');
+    Route::post('/users',             [Admin\UserController::class, 'store'])->name('users.store');
+    Route::get('/users/{id}/edit',    [Admin\UserController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{id}',         [Admin\UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{id}',      [Admin\UserController::class, 'destroy'])->name('users.destroy');
+
+    // Admin-side Offer Management
+    Route::get('/offres',             [Admin\OffreController::class, 'index'])->name('admin.offres.index');
+    Route::get('/offres/create',      [Admin\OffreController::class, 'create'])->name('admin.offres.create');
+    Route::post('/offres',            [Admin\OffreController::class, 'store'])->name('admin.offres.store');
+    Route::get('/offres/{id}/edit',   [Admin\OffreController::class, 'edit'])->name('admin.offres.edit');
+    Route::put('/offres/{id}',        [Admin\OffreController::class, 'update'])->name('admin.offres.update');
+    Route::delete('/offres/{id}',     [Admin\OffreController::class, 'destroy'])->name('admin.offres.destroy');
 });
 
 // -------------------------
-// USERS (Admin)
+// ENTREPRISE ROUTES
 // -------------------------
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-    Route::get('/users', [UserController::class, 'index'])->name('users.index');
-    Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
-    Route::post('/users', [UserController::class, 'store'])->name('users.store');
-    Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
-    Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
-    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+Route::middleware(['auth', 'role:entreprise'])->prefix('entreprise')->group(function () {
+    Route::get('/dashboard', [Company\DashboardController::class, 'index'])->name('entreprise.dashboard');
+
+    // Offer Management — dedicated Entreprise\OffreController (Phase 3)
+    Route::get('/offres',             [Entreprise\OffreController::class, 'index'])->name('offres.index');
+    Route::get('/offres/create',      [Entreprise\OffreController::class, 'create'])->name('offres.create');
+    Route::post('/offres',            [Entreprise\OffreController::class, 'store'])->name('offres.store');
+    Route::get('/offres/{id}/edit',   [Entreprise\OffreController::class, 'edit'])->name('offres.edit');
+    Route::put('/offres/{id}',        [Entreprise\OffreController::class, 'update'])->name('offres.update');
+    Route::delete('/offres/{id}',     [Entreprise\OffreController::class, 'destroy'])->name('offres.destroy');
+
+    // Candidature Management
+    Route::get('/candidatures', [Company\CandidatureController::class, 'index'])->name('candidatures.index');
+    Route::patch('/candidatures/{candidature}/statut', [Company\CandidatureController::class, 'updateStatut'])->name('candidatures.updateStatut');
 });
 
 // -------------------------
-// OFFRES (Admin, Entreprise, Student)
+// STUDENT ROUTES
 // -------------------------
-Route::middleware(['auth'])->group(function () {
-    Route::get('/offres', [OffreController::class, 'index'])->name('offres.index')->middleware('role:admin,entreprise,student');
-    
-    Route::middleware(['role:admin,entreprise'])->group(function () {
-        Route::get('/offres/create', [OffreController::class, 'create'])->name('offres.create');
-        Route::post('/offres', [OffreController::class, 'store'])->name('offres.store');
-        Route::get('/offres/{id}/edit', [OffreController::class, 'edit'])->name('offres.edit');
-        Route::put('/offres/{id}', [OffreController::class, 'update'])->name('offres.update');
-        Route::delete('/offres/{id}', [OffreController::class, 'destroy'])->name('offres.destroy');
-    });
+Route::middleware(['auth', 'role:student'])->prefix('student')->group(function () {
+    Route::get('/dashboard', [Student\DashboardController::class, 'index'])->name('student.dashboard');
+
+    Route::get('/offres', [Admin\OffreController::class, 'index'])->name('student.offres.index');
+
+    Route::get('/candidatures/create',  [Student\CandidatureController::class, 'create'])->name('candidatures.create');
+    Route::post('/candidatures',        [Student\CandidatureController::class, 'store'])->name('candidatures.store');
 });
 
 // -------------------------
-// CANDIDATURES (Admin, Entreprise, Student)
+// ENCADRANT ROUTES
 // -------------------------
-Route::middleware(['auth'])->group(function () {
-    // Admin et Entreprise 
-    Route::middleware(['role:admin,entreprise'])->group(function () {
-        Route::get('/candidatures', [CandidatureController::class, 'index'])->name('candidatures.index');
-        Route::get('/candidatures/{id}/edit', [CandidatureController::class, 'edit'])->name('candidatures.edit');
-        Route::put('/candidatures/{id}', [CandidatureController::class, 'update'])->name('candidatures.update');
-        Route::patch('/candidatures/{candidature}/statut', [CandidatureController::class, 'updateStatut'])->name('candidatures.updateStatut');
-        Route::delete('/candidatures/{id}', [CandidatureController::class, 'destroy'])->name('candidatures.destroy');
-    });
+Route::middleware(['auth', 'role:encadrant'])->prefix('encadrant')->name('encadrant.')->group(function () {
+    Route::get('/dashboard', [Supervisor\DashboardController::class, 'index'])->name('dashboard');
 
-    // Étudiants (Student)
-    Route::middleware(['role:student'])->group(function () {
-        Route::get('/candidatures/create', [CandidatureController::class, 'create'])->name('candidatures.create');
-        Route::post('/candidatures', [CandidatureController::class, 'store'])->name('candidatures.store');
-    });
+    // Phase 4 — Évaluations
+    // Named: encadrant.evaluations.index / .create / .store / .edit / .update / .destroy
+    Route::resource('evaluations', Supervisor\EvaluationController::class);
 });

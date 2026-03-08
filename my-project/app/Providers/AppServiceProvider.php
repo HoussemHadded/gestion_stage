@@ -12,7 +12,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(\App\Services\CacheService::class, function ($app) {
+            return new \App\Services\CacheService();
+        });
+
+        // Phase 4 — EvaluationService (singleton)
+        $this->app->singleton(\App\Services\EvaluationService::class, function ($app) {
+            return new \App\Services\EvaluationService();
+        });
+
+        // Phase 4 — DashboardService (singleton)
+        $this->app->singleton(\App\Services\DashboardService::class, function ($app) {
+            return new \App\Services\DashboardService();
+        });
     }
 
     /**

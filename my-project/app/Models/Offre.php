@@ -1,9 +1,13 @@
 <?php
 
+// Phase 4 — Gestion de Stage
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Offre extends Model
 {
@@ -33,8 +37,17 @@ class Offre extends Model
     }
 
     // One Offre has many Candidatures
-    public function candidatures()
+    public function candidatures(): HasMany
     {
         return $this->hasMany(Candidature::class);
+    }
+
+    /**
+     * One Offre has many Evaluations.
+     * Phase 4
+     */
+    public function evaluations(): HasMany
+    {
+        return $this->hasMany(Evaluation::class, 'offre_id');
     }
 }

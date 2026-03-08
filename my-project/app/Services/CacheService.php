@@ -17,7 +17,7 @@ class CacheService
     /**
      * Invalide le cache après create/update/destroy d'une offre.
      */
-    public static function forgetOffres(): void
+    public function forgetOffres(): void
     {
         for ($i = 1; $i <= self::MAX_PAGES; $i++) {
             Cache::forget("offres_list_page_{$i}");
@@ -29,7 +29,7 @@ class CacheService
     /**
      * Invalide le cache après create/update/destroy d'un utilisateur.
      */
-    public static function forgetUsers(): void
+    public function forgetUsers(): void
     {
         for ($i = 1; $i <= self::MAX_PAGES; $i++) {
             Cache::forget("users_list_page_{$i}");
@@ -42,7 +42,7 @@ class CacheService
     /**
      * Invalide le cache après create/update/destroy/updateStatut d'une candidature.
      */
-    public static function forgetCandidatures(): void
+    public function forgetCandidatures(): void
     {
         for ($i = 1; $i <= self::MAX_PAGES; $i++) {
             foreach (self::STATUTS as $statut) {
@@ -55,7 +55,7 @@ class CacheService
     /**
      * Invalide uniquement les listes de formulaires (entreprises, offres, students).
      */
-    public static function forgetFormLists(): void
+    public function forgetFormLists(): void
     {
         Cache::forget('entreprises_list');
         Cache::forget('offres_all_list');
@@ -65,7 +65,7 @@ class CacheService
     /**
      * Invalide le cache du dashboard admin.
      */
-    public static function forgetAdminDashboard(): void
+    public function forgetAdminDashboard(): void
     {
         Cache::forget('admin_dashboard_stats');
     }

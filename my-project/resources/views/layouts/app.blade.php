@@ -102,7 +102,7 @@
                             </li>
                         @endif
 
-                        {{-- Utilisateur connecté + Logout --}}
+                        {{-- Utilisateur connecté + Logout (web guard) --}}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-person-circle me-1"></i>{{ auth()->user()->name }}
@@ -114,22 +114,26 @@
                                     </span>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form action="{{ url('/api/logout') }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item text-danger">
-                                            <i class="bi bi-box-arrow-right me-1"></i>Déconnexion
-                                        </button>
-                                    </form>
-                                </li>
+                                @if (\Illuminate\Support\Facades\Route::has('logout'))
+                                    <li>
+                                        <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="bi bi-box-arrow-right me-1"></i>Déconnexion
+                                            </button>
+                                        </form>
+                                    </li>
+                                @endif
                             </ul>
                         </li>
                     @else
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url('/api/login') }}">
-                                <i class="bi bi-box-arrow-in-right me-1"></i>Connexion
-                            </a>
-                        </li>
+                        @if (\Illuminate\Support\Facades\Route::has('login'))
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('login') }}">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i>Connexion
+                                </a>
+                            </li>
+                        @endif
                     @endauth
 
                 </ul>

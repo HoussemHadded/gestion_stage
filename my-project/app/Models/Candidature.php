@@ -19,6 +19,7 @@ class Candidature extends Model
 
     protected $casts = [
         'date_candidature' => 'date',
+        'statut' => \App\Enums\StatutCandidature::class,
     ];
 
     /*
