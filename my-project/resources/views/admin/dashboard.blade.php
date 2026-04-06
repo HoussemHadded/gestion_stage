@@ -62,18 +62,18 @@
         </div>
     </div>
 
-    {{-- Encadrants --}}
+    {{-- Candidatures totales --}}
     <div class="col-6 col-lg-3">
         <div class="card shadow-sm h-100 border-0 border-start border-4 border-secondary">
             <div class="card-body d-flex align-items-center">
                 <div class="flex-shrink-0 me-3">
                     <div class="rounded-circle bg-secondary bg-opacity-10 p-3">
-                        <i class="bi bi-person-badge-fill text-secondary fs-4"></i>
+                        <i class="bi bi-file-earmark-text-fill text-secondary fs-4"></i>
                     </div>
                 </div>
                 <div>
-                    <h6 class="text-muted text-uppercase mb-1 small fw-semibold">Encadrants</h6>
-                    <h3 class="mb-0 fw-bold">{{ $total_encadrants }}</h3>
+                    <h6 class="text-muted text-uppercase mb-1 small fw-semibold">Candidatures</h6>
+                    <h3 class="mb-0 fw-bold">{{ $total_candidatures }}</h3>
                 </div>
             </div>
         </div>
@@ -134,22 +134,6 @@
         </div>
     </div>
 
-    {{-- Évaluations --}}
-    <div class="col-6 col-lg-3">
-        <div class="card shadow-sm h-100 border-0 border-start border-4 border-danger">
-            <div class="card-body d-flex align-items-center">
-                <div class="flex-shrink-0 me-3">
-                    <div class="rounded-circle bg-danger bg-opacity-10 p-3">
-                        <i class="bi bi-clipboard-check-fill text-danger fs-4"></i>
-                    </div>
-                </div>
-                <div>
-                    <h6 class="text-muted text-uppercase mb-1 small fw-semibold">Évaluations</h6>
-                    <h3 class="mb-0 fw-bold">{{ $total_evaluations }}</h3>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 {{-- ======================== GRAPHIQUE + CANDIDATURES RÉCENTES ======================== --}}
@@ -178,7 +162,7 @@
                 <h5 class="mb-0 fw-semibold">
                     <i class="bi bi-file-earmark-text me-2 text-primary"></i>Candidatures récentes
                 </h5>
-                <a href="{{ route('candidatures.index') }}" class="btn btn-sm btn-outline-primary">Voir tout</a>
+                <a href="{{ route('admin.offres.index') }}" class="btn btn-sm btn-outline-primary">Voir tout</a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -220,7 +204,7 @@
         <h5 class="mb-0 fw-semibold">
             <i class="bi bi-people me-2 text-primary"></i>Utilisateurs récents
         </h5>
-        <a href="{{ route('users.index') }}" class="btn btn-sm btn-outline-primary">Voir tout</a>
+        <a href="{{ route('admin.users.index') }}" class="btn btn-sm btn-outline-primary">Voir tout</a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">

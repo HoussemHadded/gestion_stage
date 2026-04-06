@@ -20,7 +20,7 @@
                     @method('PUT')
 
                     {{-- Étudiant (visible uniquement pour l'admin) --}}
-                    @if(auth()->user()->role === 'admin')
+                    @if(auth()->user()->isAdmin())
                     <div class="mb-3">
                         <label for="student_id" class="form-label">Étudiant <span class="text-danger">*</span></label>
                         <select name="student_id" id="student_id"

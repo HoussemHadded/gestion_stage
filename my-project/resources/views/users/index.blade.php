@@ -5,7 +5,7 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2><i class="bi bi-people-fill me-2"></i>Liste des Utilisateurs</h2>
-    <a href="{{ route('users.create') }}" class="btn btn-primary">
+    <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
         <i class="bi bi-plus-circle me-1"></i>Nouvel Utilisateur
     </a>
 </div>
@@ -31,26 +31,20 @@
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
                             <td>
-                                @if($user->role === 'admin')
-                                    <span class="badge bg-danger">Admin</span>
-                                @elseif($user->role === 'entreprise')
-                                    <span class="badge bg-info text-dark">Entreprise</span>
-                                @else
-                                    <span class="badge bg-success">Étudiant</span>
-                                @endif
+                                <span class="{{ $user->role->badgeClass() }}">{{ $user->role->label() }}</span>
                             </td>
                             <td>
-                                @if($user->role === 'entreprise')
+                                @if($user->isEntreprise())
                                     {{ $user->company_name ?? '—' }}
                                 @else
                                     —
                                 @endif
                             </td>
                             <td class="text-center">
-                                <a href="{{ route('users.edit', $user->id) }}" class="btn btn-sm btn-warning btn-action">
+                                <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-sm btn-warning btn-action">
                                     <i class="bi bi-pencil-square"></i> Modifier
                                 </a>
-                                <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline"
+                                <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" class="d-inline"
                                       onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')">
                                     @csrf
                                     @method('DELETE')

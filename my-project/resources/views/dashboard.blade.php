@@ -13,7 +13,7 @@
 
                 <p class="lead mb-3">
                     Bonjour {{ $user->name }}, vous êtes connecté en tant que
-                    <strong>{{ ucfirst($user->role) }}</strong>.
+                    <strong>{{ $user->role->label() }}</strong>.
                 </p>
 
                 <p class="mb-0">

@@ -1,5 +1,7 @@
 <?php
 
+// app/Http/Middleware/RoleMiddleware.php
+
 namespace App\Http\Middleware;
 
 use Closure;
@@ -7,9 +9,7 @@ use Illuminate\Http\Request;
 
 /**
  * RoleMiddleware — vérifie que l'utilisateur connecté possède l'un des rôles autorisés.
- *
- * Correction Phase 3: compare `$user->role->value` (string) au lieu de l'objet enum,
- * car les paramètres de route sont toujours des chaînes de caractères.
+ * Si non autorisé, redirige vers son propre dashboard avec un message d'erreur.
  */
 class RoleMiddleware
 {
@@ -17,9 +17,15 @@ class RoleMiddleware
     {
         $user = auth()->user();
 
-        // role est casté en UserRole enum — on compare sa valeur string
-        if (! $user || ! in_array($user->role->value, $roles, true)) {
-            abort(403, "Accès interdit : Vous n'avez pas les droits nécessaires.");
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
+        // Compare la valeur string de l'enum avec les rôles autorisés
+        if (! in_array($user->role->value, $roles, true)) {
+            return redirect()
+                ->route($user->role->dashboardRoute())
+                ->with('error', 'Accès refusé : vous n\'avez pas les droits pour cette page.');
         }
 
         return $next($request);

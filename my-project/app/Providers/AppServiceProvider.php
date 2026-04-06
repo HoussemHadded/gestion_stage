@@ -16,12 +16,7 @@ class AppServiceProvider extends ServiceProvider
             return new \App\Services\CacheService();
         });
 
-        // Phase 4 — EvaluationService (singleton)
-        $this->app->singleton(\App\Services\EvaluationService::class, function ($app) {
-            return new \App\Services\EvaluationService();
-        });
-
-        // Phase 4 — DashboardService (singleton)
+        // DashboardService (singleton)
         $this->app->singleton(\App\Services\DashboardService::class, function ($app) {
             return new \App\Services\DashboardService();
         });

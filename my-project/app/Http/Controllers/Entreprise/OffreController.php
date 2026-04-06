@@ -56,7 +56,7 @@ class OffreController extends Controller
 
         $this->offreService->store($data);
 
-        return redirect()->route('offres.index')
+        return redirect()->route('entreprise.offres.index')
                          ->with('success', __('offre.created'));
     }
 
@@ -78,7 +78,7 @@ class OffreController extends Controller
 
         $this->offreService->update($offre, $request->validated());
 
-        return redirect()->route('offres.index')
+        return redirect()->route('entreprise.offres.index')
                          ->with('success', __('offre.updated'));
     }
 
@@ -89,7 +89,7 @@ class OffreController extends Controller
 
         $this->offreService->delete($offre);
 
-        return redirect()->route('offres.index')
+        return redirect()->route('entreprise.offres.index')
                          ->with('success', __('offre.deleted'));
     }
 }

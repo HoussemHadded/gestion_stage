@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Modifier l\'offre')
+@section('title', "Modifier l'offre")
 
 @section('content')
 <div class="row justify-content-center">
@@ -8,14 +8,26 @@
 
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="bi bi-pencil-square me-2"></i>Modifier l'Offre</h2>
-            <a href="{{ route('offres.index') }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>Retour
-            </a>
+            {{-- Retour vers le bon index selon le rôle --}}
+            @if(auth()->user()->isAdmin())
+                <a href="{{ route('admin.offres.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Retour
+                </a>
+            @elseif(auth()->user()->isEntreprise())
+                <a href="{{ route('entreprise.offres.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Retour
+                </a>
+            @endif
         </div>
 
         <div class="card shadow-sm">
             <div class="card-body">
-                <form action="{{ route('offres.update', $offre->id) }}" method="POST">
+                {{-- Action du formulaire selon le rôle --}}
+                @if(auth()->user()->isAdmin())
+                    <form action="{{ route('admin.offres.update', $offre->id) }}" method="POST">
+                @else
+                    <form action="{{ route('entreprise.offres.update', $offre->id) }}" method="POST">
+                @endif
                     @csrf
                     @method('PUT')
 
@@ -53,7 +65,7 @@
                     </div>
 
                     {{-- Entreprise (visible uniquement pour l'admin) --}}
-                    @if(auth()->user()->role === 'admin')
+                    @if(auth()->user()->isAdmin())
                     <div class="mb-3">
                         <label for="entreprise_id" class="form-label">Entreprise <span class="text-danger">*</span></label>
                         <select name="entreprise_id" id="entreprise_id"

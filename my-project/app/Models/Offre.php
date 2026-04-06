@@ -1,6 +1,7 @@
 <?php
 
-// Phase 4 — Gestion de Stage
+// app/Models/Offre.php
+
 
 namespace App\Models;
 
@@ -31,7 +32,7 @@ class Offre extends Model
     */
 
     // An Offre belongs to one Entreprise
-    public function entreprise()
+    public function entreprise(): BelongsTo
     {
         return $this->belongsTo(User::class, 'entreprise_id');
     }
@@ -40,14 +41,5 @@ class Offre extends Model
     public function candidatures(): HasMany
     {
         return $this->hasMany(Candidature::class);
-    }
-
-    /**
-     * One Offre has many Evaluations.
-     * Phase 4
-     */
-    public function evaluations(): HasMany
-    {
-        return $this->hasMany(Evaluation::class, 'offre_id');
     }
 }

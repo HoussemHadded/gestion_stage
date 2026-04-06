@@ -8,14 +8,14 @@
 
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="bi bi-pencil-square me-2"></i>Modifier l'utilisateur</h2>
-            <a href="{{ route('users.index') }}" class="btn btn-outline-secondary">
+            <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-1"></i>Retour
             </a>
         </div>
 
         <div class="card shadow-sm">
             <div class="card-body">
-                <form action="{{ route('users.update', $user->id) }}" method="POST">
+                <form action="{{ route('admin.users.update', $user->id) }}" method="POST">
                     @csrf
                     @method('PUT')
 
@@ -58,9 +58,9 @@
                         <select name="role" id="role"
                                 class="form-select @error('role') is-invalid @enderror" required>
                             <option value="">-- Sélectionner un rôle --</option>
-                            <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Admin</option>
-                            <option value="student" {{ old('role', $user->role) === 'student' ? 'selected' : '' }}>Étudiant</option>
-                            <option value="entreprise" {{ old('role', $user->role) === 'entreprise' ? 'selected' : '' }}>Entreprise</option>
+                            <option value="admin" {{ old('role', $user->role->value) === 'admin' ? 'selected' : '' }}>Admin</option>
+                            <option value="student" {{ old('role', $user->role->value) === 'student' ? 'selected' : '' }}>Étudiant</option>
+                            <option value="entreprise" {{ old('role', $user->role->value) === 'entreprise' ? 'selected' : '' }}>Entreprise</option>
                         </select>
                         @error('role')
                             <div class="invalid-feedback">{{ $message }}</div>

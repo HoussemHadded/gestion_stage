@@ -1,6 +1,6 @@
 <?php
 
-// Phase 4 — Gestion de Stage
+// app/Models/User.php
 
 namespace App\Models;
 
@@ -42,38 +42,20 @@ class User extends Authenticatable
     */
 
     /** One Entreprise has many Offres */
-    public function offres()
+    public function offres(): HasMany
     {
         return $this->hasMany(Offre::class, 'entreprise_id');
     }
 
     /** One Student has many Candidatures */
-    public function candidatures()
+    public function candidatures(): HasMany
     {
         return $this->hasMany(Candidature::class, 'student_id');
     }
 
-    /**
-     * Evaluations received by this user (as a student).
-     * Phase 4
-     */
-    public function receivedEvaluations(): HasMany
-    {
-        return $this->hasMany(Evaluation::class, 'student_id');
-    }
-
-    /**
-     * Evaluations given by this user (as an encadrant / supervisor).
-     * Phase 4
-     */
-    public function givenEvaluations(): HasMany
-    {
-        return $this->hasMany(Evaluation::class, 'encadrant_id');
-    }
-
     /*
     |--------------------------------------------------------------------------
-    | Role Helpers (compare against UserRole enum instances)
+    | Role Helpers
     |--------------------------------------------------------------------------
     */
 
@@ -90,10 +72,5 @@ class User extends Authenticatable
     public function isEntreprise(): bool
     {
         return $this->role === UserRole::Entreprise;
-    }
-
-    public function isEncadrant(): bool
-    {
-        return $this->role === UserRole::Encadrant;
     }
 }

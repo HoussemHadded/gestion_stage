@@ -1,5 +1,7 @@
 <?php
 
+// app/Http/Controllers/Auth/LoginController.php
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -35,7 +37,7 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/')
+        return redirect()->route('login')
                 ->with('success', __('messages.logout_success'));
     }
 }

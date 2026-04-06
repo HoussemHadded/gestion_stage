@@ -48,7 +48,7 @@ class CandidatureController extends Controller
 
         $this->candidatureService->store($data);
 
-        return redirect()->route('dashboard')
+        return redirect()->route('student.dashboard')
                          ->with('success', __('candidature.created'));
     }
 }

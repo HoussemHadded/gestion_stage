@@ -1,8 +1,6 @@
 <?php
 
-// Refactored: Laravel 12 authoritative middleware registration.
-// Kernel.php removed — all middleware now lives here.
-// Added: 'role' alias for RBAC, explicit web stack confirmation.
+// bootstrap/app.php
 
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -17,28 +15,14 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // -------------------------------------------------------
-        // Route middleware aliases
+        // Alias de middleware pour les routes
         // -------------------------------------------------------
         $middleware->alias([
-            // Custom RBAC middleware — used as 'role:admin', 'role:student', etc.
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
+            // RBAC : utilisé comme 'role:admin', 'role:student', 'role:entreprise'
+            'role'      => \App\Http\Middleware\RoleMiddleware::class,
+            // Redirige les utilisateurs déjà connectés hors de /login et /register
+            'auth.guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         ]);
-
-        // -------------------------------------------------------
-        // Throttle the authentication endpoints to prevent brute force.
-        // The 'throttle:10,1' limiter is applied directly in routes/web.php
-        // to the POST /login route. No global config needed here.
-        // -------------------------------------------------------
-
-        // Note: In Laravel 12 the following middleware are active by default
-        // in the 'web' group via the framework's own pipeline:
-        //   - EncryptCookies
-        //   - AddQueuedCookiesToResponse
-        //   - StartSession
-        //   - ShareErrorsFromSession
-        //   - VerifyCsrfToken          ← CSRF protection IS active
-        //   - SubstituteBindings
-        // No manual re-declaration is needed.
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
@@ -47,4 +31,3 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Providers\AuthServiceProvider::class,
     ])
     ->create();
-
