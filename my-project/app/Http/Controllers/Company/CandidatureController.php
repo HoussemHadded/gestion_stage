@@ -51,15 +51,29 @@ class CandidatureController extends Controller
         return view('candidatures.index', compact('candidatures'));
     }
 
-    public function updateStatut(UpdateStatutRequest $request, Candidature $candidature)
+    public function accept($id)
     {
-        $this->authorize('updateStatut', $candidature);
+        $candidature = Candidature::with('offre')->findOrFail($id);
 
-        // Phase 3 fix: cast string to enum before passing to service
-        $statut = StatutCandidature::from($request->validated()['statut']);
+        if ($candidature->offre->entreprise_id !== auth()->id()) {
+            abort(403, "Vous ne pouvez pas accepter une candidature qui ne vous appartient pas.");
+        }
 
-        $this->candidatureService->updateStatut($candidature, $statut);
+        $this->candidatureService->updateStatut($candidature, StatutCandidature::Acceptee);
 
-        return back()->with('success', __('candidature.status_updated'));
+        return back()->with('success', 'Candidature acceptée !');
+    }
+
+    public function reject($id)
+    {
+        $candidature = Candidature::with('offre')->findOrFail($id);
+
+        if ($candidature->offre->entreprise_id !== auth()->id()) {
+            abort(403, "Vous ne pouvez pas refuser une candidature qui ne vous appartient pas.");
+        }
+
+        $this->candidatureService->updateStatut($candidature, StatutCandidature::Refusee);
+
+        return back()->with('success', 'Candidature refusée !');
     }
 }

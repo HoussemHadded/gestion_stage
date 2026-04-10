@@ -4,14 +4,14 @@
 
 @section('content')
 
-<h2 class="page-title text-center mb-1">Créer un compte</h2>
-<p class="page-subtitle text-center mb-4">Rejoignez la plateforme GestionStages</p>
+<h2 class="text-3xl font-bold text-white text-center mb-1">Créer un compte</h2>
+<p class="text-gray-300 text-center mb-8 text-sm">Rejoignez la plateforme GestionStages</p>
 
-<form method="POST" action="{{ route('register') }}">
+<form method="POST" action="{{ route('register') }}" class="space-y-5">
     @csrf
 
-    <div class="mb-3">
-        <label for="name" class="form-label">Nom complet</label>
+    <div>
+        <label for="name" class="block text-sm font-medium text-gray-200 mb-2">Nom complet</label>
         <input type="text"
                id="name"
                name="name"
@@ -19,74 +19,74 @@
                required
                autofocus
                placeholder="Votre nom et prénom"
-               class="form-control @error('name') is-invalid @enderror">
+               class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-inner @error('name') border-red-500 @enderror">
         @error('name')
-            <div class="invalid-feedback">{{ $message }}</div>
+            <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
         @enderror
     </div>
 
-    <div class="mb-3">
-        <label for="email" class="form-label">Adresse email</label>
+    <div>
+        <label for="email" class="block text-sm font-medium text-gray-200 mb-2">Adresse email</label>
         <input type="email"
                id="email"
                name="email"
                value="{{ old('email') }}"
                required
                placeholder="vous@exemple.com"
-               class="form-control @error('email') is-invalid @enderror">
+               class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-inner @error('email') border-red-500 @enderror">
         @error('email')
-            <div class="invalid-feedback">{{ $message }}</div>
+            <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
         @enderror
     </div>
 
-    <div class="mb-3">
-        <label for="role" class="form-label">Profil</label>
+    <div>
+        <label for="role" class="block text-sm font-medium text-gray-200 mb-2">Profil</label>
         <select id="role"
                 name="role"
-                class="form-select @error('role') is-invalid @enderror"
+                class="w-full bg-gray-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-inner @error('role') border-red-500 @enderror"
                 required>
-            <option value="">-- Sélectionner votre profil --</option>
+            <option value="" class="text-gray-400">-- Sélectionner votre profil --</option>
             <option value="student"    {{ old('role') === 'student'    ? 'selected' : '' }}>🎓 Étudiant</option>
             <option value="entreprise" {{ old('role') === 'entreprise' ? 'selected' : '' }}>🏢 Entreprise</option>
         </select>
         @error('role')
-            <div class="invalid-feedback">{{ $message }}</div>
+            <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
         @enderror
     </div>
 
-    <div class="mb-3">
-        <label for="password" class="form-label">Mot de passe</label>
+    <div>
+        <label for="password" class="block text-sm font-medium text-gray-200 mb-2">Mot de passe</label>
         <input type="password"
                id="password"
                name="password"
                required
                placeholder="Minimum 8 caractères"
-               class="form-control @error('password') is-invalid @enderror">
+               class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-inner @error('password') border-red-500 @enderror">
         @error('password')
-            <div class="invalid-feedback">{{ $message }}</div>
+            <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
         @enderror
     </div>
 
-    <div class="mb-4">
-        <label for="password_confirmation" class="form-label">Confirmer le mot de passe</label>
+    <div>
+        <label for="password_confirmation" class="block text-sm font-medium text-gray-200 mb-2">Confirmer le mot de passe</label>
         <input type="password"
                id="password_confirmation"
                name="password_confirmation"
                required
                placeholder="Répétez votre mot de passe"
-               class="form-control">
+               class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-inner">
     </div>
 
-    <button type="submit" id="btn-register" class="btn btn-primary-gradient">
-        <i class="bi bi-person-plus-fill me-2"></i>Créer mon compte
+    <button type="submit" id="btn-register" class="w-full mt-2 flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-gray-900 transition-all transform hover:-translate-y-0.5">
+        <i class="bi bi-person-plus-fill mr-2"></i>Créer mon compte
     </button>
 </form>
 
-<hr class="divider">
+<hr class="border border-white/10 my-8">
 
-<p class="text-center mb-0" style="color: rgba(255,255,255,0.6); font-size:0.875rem;">
+<p class="text-center text-sm text-gray-400">
     Déjà inscrit ?
-    <a href="{{ route('login') }}" class="text-link ms-1">Se connecter →</a>
+    <a href="{{ route('login') }}" class="font-medium text-indigo-400 hover:text-indigo-300 transition">Se connecter &rarr;</a>
 </p>
 
 @endsection

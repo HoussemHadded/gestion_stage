@@ -23,6 +23,16 @@ class CandidatureService
 
         $candidature = Candidature::create($data);
 
+        // Notify the enterprise owner
+        $candidature->load('offre.entreprise', 'student');
+        if ($candidature->offre->entreprise) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($candidature->offre->entreprise)->send(new \App\Mail\ApplicationSubmittedMail($candidature));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Failed to send application email: " . $e->getMessage());
+            }
+        }
+
         $this->cacheService->forgetCandidatures();
 
         return $candidature;
@@ -41,11 +51,21 @@ class CandidatureService
      * Met à jour le statut d'une candidature.
      *
      * @param  Candidature        $candidature
-     * @param  StatutCandidature  $statut  — enum typé fort (plus de string brut)
+     * @param  StatutCandidature  $statut
      */
     public function updateStatut(Candidature $candidature, StatutCandidature $statut): bool
     {
         $result = $candidature->update(['statut' => $statut]);
+
+        // Notify the student
+        $candidature->load('student', 'offre.entreprise');
+        if ($candidature->student) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($candidature->student)->send(new \App\Mail\ApplicationStatusUpdatedMail($candidature));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Failed to send status update email: " . $e->getMessage());
+            }
+        }
 
         $this->cacheService->forgetCandidatures();
 

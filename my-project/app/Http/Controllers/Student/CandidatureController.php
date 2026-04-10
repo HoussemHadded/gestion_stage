@@ -32,40 +32,30 @@ class CandidatureController extends Controller
         return view('student.candidatures', compact('candidatures'));
     }
 
-    public function create()
+    public function store(\Illuminate\Http\Request $request, $id)
     {
-        $this->authorize('create', Candidature::class);
+        \Illuminate\Support\Facades\Log::info("Tentative de postuler à l'offre $id", ['user_id' => auth()->id()]);
+        // Replace isStudent() with strict role check requested by user
+        if (auth()->user()->role->value !== 'student') {
+            abort(403, 'Accès non autorisé.');
+        }
 
-        $offres = Cache::remember('offres_all_list', 300, function () {
-            return Offre::all();
-        });
-
-        return view('candidatures.create', compact('offres'));
-    }
-
-    public function store(StoreCandidatureRequest $request)
-    {
-        $this->authorize('create', Candidature::class);
-
-        $validated = $request->validated();
-
-        // Business rule: one candidature per student per offer
         $alreadyApplied = Candidature::where('student_id', auth()->id())
-            ->where('offre_id', $validated['offre_id'])
+            ->where('offre_id', $id)
             ->exists();
 
         if ($alreadyApplied) {
-            return back()->withErrors([
-                'offre_id' => __('candidature.already_applied')
-            ])->withInput();
+            return back()->with('error', 'Vous avez déjà postulé à cette offre.');
         }
 
-        $data = $validated;
-        $data['student_id'] = auth()->id();
+        // Pass only the strictly required fields to the service
+        // CandidatureService will automatically inject the correct Enum STATUS and DATE
+        $this->candidatureService->store([
+            'student_id' => auth()->id(),
+            'offre_id' => $id,
+            'cv' => 'Candidature simplifiée',
+        ]);
 
-        $this->candidatureService->store($data);
-
-        return redirect()->route('student.dashboard')
-                         ->with('success', __('candidature.created'));
+        return back()->with('success', 'Candidature envoyée avec succès');
     }
 }

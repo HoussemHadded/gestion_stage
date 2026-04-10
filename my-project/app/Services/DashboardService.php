@@ -78,4 +78,44 @@ class DashboardService
             );
         });
     }
+
+    public function getEntrepriseStats(User $user): array
+    {
+        return Cache::remember("entreprise_dashboard_stats_{$user->id}", self::CACHE_TTL, function () use ($user) {
+            $total_offres = Offre::where('entreprise_id', $user->id)->count();
+
+            // All candidatures for their offers
+            $candidatures = Candidature::whereHas('offre', function($q) use ($user) {
+                $q->where('entreprise_id', $user->id);
+            });
+
+            $total_candidatures = (clone $candidatures)->count();
+            
+            $pending = (clone $candidatures)->where('statut', StatutCandidature::EnAttente->value)->count();
+            $accepted = (clone $candidatures)->where('statut', StatutCandidature::Acceptee->value)->count();
+            $rejected = (clone $candidatures)->where('statut', StatutCandidature::Refusee->value)->count();
+
+            $chartLabels = ['En Attente', 'Acceptées', 'Refusées'];
+            $chartData = [$pending, $accepted, $rejected];
+
+            return compact('total_offres', 'total_candidatures', 'pending', 'accepted', 'rejected', 'chartLabels', 'chartData');
+        });
+    }
+
+    public function getStudentStats(User $user): array
+    {
+        return Cache::remember("student_dashboard_stats_{$user->id}", self::CACHE_TTL, function () use ($user) {
+            $candidatures = Candidature::where('student_id', $user->id);
+
+            $total_candidatures = (clone $candidatures)->count();
+            $pending = (clone $candidatures)->where('statut', StatutCandidature::EnAttente->value)->count();
+            $accepted = (clone $candidatures)->where('statut', StatutCandidature::Acceptee->value)->count();
+            $rejected = (clone $candidatures)->where('statut', StatutCandidature::Refusee->value)->count();
+
+            $chartLabels = ['En Attente', 'Acceptées', 'Refusées'];
+            $chartData = [$pending, $accepted, $rejected];
+
+            return compact('total_candidatures', 'pending', 'accepted', 'rejected', 'chartLabels', 'chartData');
+        });
+    }
 }

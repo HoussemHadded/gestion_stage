@@ -4,66 +4,61 @@
 
 @section('content')
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
     <div>
-        <h2><i class="bi bi-briefcase-fill me-2"></i>Offres de Stage</h2>
-        <p class="text-muted mb-0">Parcourez les offres disponibles et postulez</p>
+        <h2 class="text-3xl font-extrabold text-gray-900 flex items-center">
+            <i class="bi bi-briefcase-fill text-indigo-600 mr-3"></i>Offres de Stage
+        </h2>
+        <p class="mt-1 text-sm text-gray-500">Parcourez les offres disponibles et postulez au stage de vos rêves.</p>
     </div>
-    <a href="{{ route('student.candidatures.create') }}" class="btn btn-primary">
-        <i class="bi bi-pencil-square me-1"></i>Postuler
-    </a>
 </div>
 
 @if($offres->isEmpty())
-    <div class="card shadow-sm">
-        <div class="card-body text-center py-5">
-            <i class="bi bi-inbox display-4 text-muted d-block mb-3"></i>
-            <h5 class="text-muted">Aucune offre disponible pour le moment</h5>
-            <p class="text-muted small">Revenez plus tard, de nouvelles offres seront publiées bientôt.</p>
-        </div>
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
+        <i class="bi bi-inbox text-6xl text-gray-300 mb-4 inline-block"></i>
+        <h5 class="text-xl font-bold text-gray-700 mb-2">Aucune offre disponible pour le moment</h5>
+        <p class="text-gray-500">Revenez plus tard, de nouvelles opportunités seront publiées bientôt.</p>
     </div>
 @else
-    <div class="row g-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($offres as $offre)
-            <div class="col-md-6 col-lg-4">
-                <div class="card shadow-sm h-100 border-0" style="border-radius: 12px;">
-                    <div class="card-body p-4 d-flex flex-column">
-                        <div class="d-flex align-items-start mb-3">
-                            <div class="rounded-circle bg-primary bg-opacity-10 p-2 me-3 flex-shrink-0"
-                                 style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;">
-                                <i class="bi bi-building text-primary"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold mb-0">{{ $offre->titre }}</h6>
-                                <small class="text-muted">
-                                    <i class="bi bi-building me-1"></i>{{ $offre->entreprise->name ?? 'Entreprise inconnue' }}
-                                </small>
-                            </div>
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col h-full transform hover:-translate-y-1">
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="flex items-start mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex flex-shrink-0 items-center justify-center text-xl mr-4">
+                            <i class="bi bi-building"></i>
                         </div>
-
-                        <p class="text-muted small mb-3 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-                            {{ $offre->description }}
-                        </p>
-
-                        <div class="d-flex flex-wrap gap-2 mb-3">
-                            @if($offre->lieu)
-                                <span class="badge bg-light text-dark border" style="font-weight:500;">
-                                    <i class="bi bi-geo-alt me-1"></i>{{ $offre->lieu }}
-                                </span>
-                            @endif
+                        <div>
+                            <h6 class="font-bold text-gray-900 leading-tight mb-1">{{ $offre->titre }}</h6>
+                            <p class="text-sm font-medium text-gray-500 flex items-center">
+                                <i class="bi bi-building mr-1.5"></i>{{ $offre->entreprise->name ?? 'Entreprise inconnue' }}
+                            </p>
                         </div>
+                    </div>
 
-                        <div class="d-flex align-items-center justify-content-between mt-auto">
-                            <small class="text-muted">
-                                <i class="bi bi-calendar3 me-1"></i>
-                                {{ $offre->date_publication ? \Carbon\Carbon::parse($offre->date_publication)->format('d/m/Y') : '—' }}
-                            </small>
-                            <a href="{{ route('student.candidatures.create', ['offre_id' => $offre->id]) }}"
-                               class="btn btn-sm btn-primary"
-                               style="border-radius:8px;">
-                                <i class="bi bi-send me-1"></i>Postuler
-                            </a>
-                        </div>
+                    <p class="text-gray-600 text-sm mb-4 flex-grow line-clamp-3">
+                        {{ $offre->description }}
+                    </p>
+
+                    <div class="flex flex-wrap gap-2 mb-6 mt-auto">
+                        @if($offre->lieu)
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                                <i class="bi bi-geo-alt mr-1"></i>{{ $offre->lieu }}
+                            </span>
+                        @endif
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <span class="text-xs font-medium text-gray-400 flex items-center">
+                            <i class="bi bi-calendar3 mr-1.5"></i>
+                            {{ $offre->date_publication ? \Carbon\Carbon::parse($offre->date_publication)->format('d/m/Y') : '—' }}
+                        </span>
+                        <form action="{{ route('student.offres.postuler', $offre->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-lg shadow-sm transition">
+                                <i class="bi bi-send mr-2"></i>Postuler
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -71,7 +66,7 @@
     </div>
 
     {{-- Pagination --}}
-    <div class="mt-4 d-flex justify-content-center">
+    <div class="mt-8 flex justify-center">
         {{ $offres->links() }}
     </div>
 @endif

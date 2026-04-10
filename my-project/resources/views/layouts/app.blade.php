@@ -1,178 +1,140 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="bg-gray-50 h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Gestion de Stages')</title>
 
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
+    <!-- Bootstrap Icons (Keeping purely for icons since they are used widely) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            background-color: #f4f6f9;
-        }
-        main { flex: 1; }
-        .navbar-brand { font-weight: 700; letter-spacing: 1px; }
-        .table th { background-color: #343a40; color: #fff; }
-        .btn-action { margin-right: 4px; }
-        footer { background-color: #343a40; }
-    </style>
+    
+    <!-- Tailwind CSS (CDN Fallback) -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
     @stack('styles')
 </head>
-<body>
+<body class="h-full flex flex-col font-sans text-gray-800 antialiased">
 
     {{-- ======================== NAVBAR ======================== --}}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="{{ route('dashboard') }}">
-                <i class="bi bi-mortarboard-fill me-2"></i>Gestion de Stages
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+    <nav class="bg-gray-900 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                {{-- Brand --}}
+                <div class="flex items-center">
+                    <a href="{{ route('dashboard') }}" class="flex items-center text-lg font-bold tracking-wider hover:text-indigo-400 transition">
+                        <i class="bi bi-mortarboard-fill mr-2 text-indigo-500"></i>
+                        Gestion de Stages
+                    </a>
+                </div>
 
-            <div class="collapse navbar-collapse" id="mainNav">
-                <ul class="navbar-nav ms-auto">
-
+                {{-- Desktop Menu --}}
+                <div class="hidden sm:flex sm:items-center sm:space-x-4">
                     @auth
-                        {{-- Lien accueil → dashboard du rôle --}}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('dashboard') }}">
-                                <i class="bi bi-house-door me-1"></i>Accueil
-                            </a>
-                        </li>
+                        <a href="{{ route('dashboard') }}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 hover:text-indigo-300 transition">
+                            <i class="bi bi-house-door mr-1"></i>Accueil
+                        </a>
 
                         {{-- Admin --}}
                         @if(auth()->user()->isAdmin())
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('admin.dashboard') }}">
-                                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('admin.users.index') }}">
-                                    <i class="bi bi-people me-1"></i>Utilisateurs
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('admin.offres.index') }}">
-                                    <i class="bi bi-briefcase me-1"></i>Offres
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('admin.candidatures.index') }}">
-                                    <i class="bi bi-file-earmark-text me-1"></i>Candidatures
-                                </a>
-                            </li>
+                            <a href="{{ route('admin.dashboard') }}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 hover:text-indigo-300 transition">
+                                <i class="bi bi-speedometer2 mr-1"></i>Dashboard
+                            </a>
+                            <a href="{{ route('admin.users.index') }}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 hover:text-indigo-300 transition">
+                                <i class="bi bi-people mr-1"></i>Utilisateurs
+                            </a>
+                            <a href="{{ route('admin.offres.index') }}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 hover:text-indigo-300 transition">
+                                <i class="bi bi-briefcase mr-1"></i>Offres
+                            </a>
+                            <a href="{{ route('admin.candidatures.index') }}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 hover:text-indigo-300 transition">
+                                <i class="bi bi-file-earmark-text mr-1"></i>Candidatures
+                            </a>
                         @endif
 
                         {{-- Entreprise --}}
                         @if(auth()->user()->isEntreprise())
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('entreprise.dashboard') }}">
-                                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('entreprise.offres.index') }}">
-                                    <i class="bi bi-briefcase me-1"></i>Mes offres
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('entreprise.candidatures.index') }}">
-                                    <i class="bi bi-file-earmark-text me-1"></i>Candidatures
-                                </a>
-                            </li>
+                            <a href="{{ route('entreprise.dashboard') }}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 hover:text-indigo-300 transition">
+                                <i class="bi bi-speedometer2 mr-1"></i>Dashboard
+                            </a>
+                            <a href="{{ route('entreprise.offres.index') }}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 hover:text-indigo-300 transition">
+                                <i class="bi bi-briefcase mr-1"></i>Mes offres
+                            </a>
+                            <a href="{{ route('entreprise.candidatures.index') }}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 hover:text-indigo-300 transition">
+                                <i class="bi bi-file-earmark-text mr-1"></i>Candidatures
+                            </a>
                         @endif
 
                         {{-- Étudiant --}}
                         @if(auth()->user()->isStudent())
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('student.dashboard') }}">
-                                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('student.offres.index') }}">
-                                    <i class="bi bi-briefcase me-1"></i>Offres
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('student.candidatures.index') }}">
-                                    <i class="bi bi-folder2-open me-1"></i>Mes Candidatures
-                                </a>
-                            </li>
+                            <a href="{{ route('student.dashboard') }}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 hover:text-indigo-300 transition">
+                                <i class="bi bi-speedometer2 mr-1"></i>Dashboard
+                            </a>
+                            <a href="{{ route('student.offres.index') }}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 hover:text-indigo-300 transition">
+                                <i class="bi bi-briefcase mr-1"></i>Offres
+                            </a>
+                            <a href="{{ route('student.candidatures.index') }}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 hover:text-indigo-300 transition">
+                                <i class="bi bi-folder2-open mr-1"></i>Mes Candidatures
+                            </a>
                         @endif
 
-                        {{-- Profil + Déconnexion --}}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle me-1"></i>{{ auth()->user()->name }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <span class="dropdown-item-text text-muted">
-                                        Rôle : <strong>{{ auth()->user()->role->label() }}</strong>
-                                    </span>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item text-danger">
-                                            <i class="bi bi-box-arrow-right me-1"></i>Déconnexion
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
+                        {{-- Profile / Logout --}}
+                        <div class="ml-4 flex items-center border-l border-gray-700 pl-4 space-x-4">
+                            <span class="text-sm font-medium text-gray-300">
+                                <i class="bi bi-person-circle mr-1"></i>{{ auth()->user()->name }}
+                                <span class="ml-1 text-xs px-2 py-1 bg-gray-800 text-indigo-300 rounded-full">{{ auth()->user()->role->label() }}</span>
+                            </span>
+                            
+                            <form action="{{ route('logout') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="text-sm font-medium text-red-400 hover:text-red-300 transition">
+                                    <i class="bi bi-box-arrow-right mr-1"></i>Déconnexion
+                                </button>
+                            </form>
+                        </div>
                     @else
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('login') }}">
-                                <i class="bi bi-box-arrow-in-right me-1"></i>Connexion
-                            </a>
-                        </li>
+                        <a href="{{ route('login') }}" class="px-3 py-2 rounded-md text-sm font-medium bg-indigo-600 hover:bg-indigo-500 transition shadow">
+                            <i class="bi bi-box-arrow-in-right mr-1"></i>Connexion
+                        </a>
                     @endauth
-
-                </ul>
+                </div>
             </div>
         </div>
     </nav>
 
     {{-- ======================== FLASH MESSAGES ======================== --}}
-    <main class="container py-4">
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <div class="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-r-md shadow-sm">
+                <div class="flex items-center">
+                    <i class="bi bi-check-circle-fill text-green-500 mr-3 text-lg"></i>
+                    <p class="text-green-700 font-medium">{{ session('success') }}</p>
+                </div>
             </div>
         @endif
 
         @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-md shadow-sm">
+                <div class="flex items-center">
+                    <i class="bi bi-exclamation-triangle-fill text-red-500 mr-3 text-lg"></i>
+                    <p class="text-red-700 font-medium">{{ session('error') }}</p>
+                </div>
             </div>
         @endif
 
         @if($errors->any())
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong><i class="bi bi-exclamation-triangle me-2"></i>Erreurs de validation :</strong>
-                <ul class="mb-0 mt-2">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-md shadow-sm">
+                <div class="flex items-start">
+                    <i class="bi bi-exclamation-triangle-fill text-red-500 mr-3 mt-0.5 text-lg"></i>
+                    <div>
+                        <strong class="text-red-800 font-medium block mb-1">Erreurs de validation :</strong>
+                        <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
             </div>
         @endif
 
@@ -182,14 +144,31 @@
     </main>
 
     {{-- ======================== FOOTER ======================== --}}
-    <footer class="text-white text-center py-3 mt-auto">
-        <div class="container">
-            <small>&copy; {{ date('Y') }} Gestion de Stages &mdash; Tous droits réservés.</small>
+    <footer class="bg-gray-900 text-gray-400 py-6 mt-12 w-full text-center text-sm shadow-inner mt-auto">
+        <div class="max-w-7xl mx-auto px-4">
+            &copy; {{ date('Y') }} Gestion de Stages &mdash; Tous droits réservés.
         </div>
     </footer>
 
-    <!-- Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('form:not([data-no-loader])').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    if (this.dataset.loading === 'true') {
+                        e.preventDefault();
+                        return;
+                    }
+                    this.dataset.loading = 'true';
+                    let btn = this.querySelector('button[type="submit"]');
+                    if (btn) {
+                        btn.dataset.originalHtml = btn.innerHTML;
+                        btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin mr-2"></i>Chargement...';
+                        btn.classList.add('opacity-75', 'cursor-not-allowed');
+                    }
+                });
+            });
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>

@@ -17,12 +17,7 @@ use App\Http\Controllers\DashboardController;
 | Guest   → landing page
 | Auth    → /dashboard (qui redirige selon le rôle)
 */
-Route::get('/', function () {
-    if (auth()->check()) {
-        return redirect()->route('dashboard');
-    }
-    return view('landing');
-})->name('home');
+Route::view('/', 'landing')->name('home');
 
 /*
 |--------------------------------------------------------------------------
@@ -80,6 +75,11 @@ Route::middleware(['auth', 'role:admin'])
 
         // Gestion globale des candidatures
         Route::get('/candidatures',        [Admin\CandidatureController::class, 'index'])->name('candidatures.index');
+
+        // Exports PDF Admin
+        Route::get('/export/users',        [\App\Http\Controllers\ExportController::class, 'exportAdminUsers'])->name('export.users');
+        Route::get('/export/offres',       [\App\Http\Controllers\ExportController::class, 'exportAdminOffers'])->name('export.offres');
+        Route::get('/export/candidatures', [\App\Http\Controllers\ExportController::class, 'exportAdminCandidatures'])->name('export.candidatures');
     });
 
 /*
@@ -103,7 +103,8 @@ Route::middleware(['auth', 'role:entreprise'])
 
         // Gestion des candidatures reçues
         Route::get('/candidatures',        [Company\CandidatureController::class, 'index'])->name('candidatures.index');
-        Route::patch('/candidatures/{candidature}/statut', [Company\CandidatureController::class, 'updateStatut'])->name('candidatures.updateStatut');
+        Route::patch('/candidatures/{id}/accept', [Company\CandidatureController::class, 'accept'])->name('candidatures.accept');
+        Route::patch('/candidatures/{id}/reject', [Company\CandidatureController::class, 'reject'])->name('candidatures.reject');
     });
 
 /*
@@ -123,6 +124,8 @@ Route::middleware(['auth', 'role:student'])
 
         // Candidatures
         Route::get('/candidatures',        [Student\CandidatureController::class, 'index'])->name('candidatures.index');
-        Route::get('/candidatures/create', [Student\CandidatureController::class, 'create'])->name('candidatures.create');
-        Route::post('/candidatures',       [Student\CandidatureController::class, 'store'])->name('candidatures.store');
+        Route::post('/offres/{id}/postuler', [Student\CandidatureController::class, 'store'])->name('offres.postuler');
+
+        // Export PDF Etudiant
+        Route::get('/export/candidatures/{id}', [\App\Http\Controllers\ExportController::class, 'exportStudentCandidature'])->name('export.candidature');
     });

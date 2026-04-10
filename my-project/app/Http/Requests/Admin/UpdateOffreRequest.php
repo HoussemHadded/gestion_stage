@@ -16,13 +16,18 @@ class UpdateOffreRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'titre'            => ['required', 'string', 'max:255'],
             'description'      => ['required', 'string'],
             'lieu'             => ['nullable', 'string', 'max:255'],
             'date_publication' => ['required', 'date'],
-            'entreprise_id'    => ['required', 'exists:users,id'],
         ];
+
+        if (auth()->user() && auth()->user()->isAdmin()) {
+            $rules['entreprise_id'] = ['required', 'exists:users,id'];
+        }
+
+        return $rules;
     }
 
     public function messages(): array

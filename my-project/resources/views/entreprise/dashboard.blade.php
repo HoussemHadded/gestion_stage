@@ -1,119 +1,115 @@
 @extends('layouts.app')
 
-@section('title', 'Tableau de Bord Entreprise')
+@section('title', 'Tableau de bord Entreprise')
 
 @section('content')
 
-{{-- En-tête --}}
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="mb-8 flex justify-between items-end">
     <div>
-        <h2 class="mb-1"><i class="bi bi-building me-2 text-warning"></i>Tableau de Bord Entreprise</h2>
-        <p class="text-muted mb-0">Bienvenue, <strong>{{ auth()->user()->name }}</strong>
-            @if(auth()->user()->company_name)
-                — {{ auth()->user()->company_name }}
-            @endif
-        </p>
+        <h2 class="text-3xl font-extrabold text-gray-900 flex items-center">
+            <i class="bi bi-building text-amber-500 mr-3"></i>Espace Entreprise
+        </h2>
+        <p class="mt-1 text-sm text-gray-500">Gérez vos offres de stage et analysez l'impact de vos recrutements.</p>
     </div>
-    <a href="{{ route('entreprise.offres.create') }}" class="btn btn-warning">
-        <i class="bi bi-plus-circle me-1"></i>Publier une offre
+    <a href="{{ route('entreprise.offres.create') }}" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-lg shadow-md transition">
+        <i class="bi bi-plus-circle mr-2"></i>Publier une offre
     </a>
 </div>
 
-{{-- Statistiques --}}
-<div class="row g-4 mb-4">
-    <div class="col-12 col-sm-6 col-lg-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body d-flex align-items-center gap-3">
-                <div class="rounded-3 bg-warning bg-opacity-10 p-3">
-                    <i class="bi bi-briefcase-fill fs-3 text-warning"></i>
-                </div>
-                <div>
-                    <div class="fs-2 fw-bold">{{ $totalOffres }}</div>
-                    <div class="text-muted small">Offres publiées</div>
-                </div>
-            </div>
-        </div>
+{{-- KPI Cards --}}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col items-center justify-center">
+        <p class="text-sm font-medium text-gray-500 uppercase">Offres actives</p>
+        <h3 class="text-3xl font-bold text-gray-900 mt-2">{{ $total_offres }}</h3>
     </div>
-    <div class="col-12 col-sm-6 col-lg-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body d-flex align-items-center gap-3">
-                <div class="rounded-3 bg-primary bg-opacity-10 p-3">
-                    <i class="bi bi-people-fill fs-3 text-primary"></i>
-                </div>
-                <div>
-                    <div class="fs-2 fw-bold">{{ $totalCandidatures }}</div>
-                    <div class="text-muted small">Candidatures reçues</div>
-                </div>
-            </div>
-        </div>
+    
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col items-center justify-center">
+        <p class="text-sm font-medium text-gray-500 uppercase">Candidatures reçues</p>
+        <h3 class="text-3xl font-bold text-gray-900 mt-2">{{ $total_candidatures }}</h3>
     </div>
-    <div class="col-12 col-sm-6 col-lg-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body d-flex align-items-center gap-3">
-                <div class="rounded-3 bg-success bg-opacity-10 p-3">
-                    <i class="bi bi-graph-up-arrow fs-3 text-success"></i>
-                </div>
-                <div>
-                    <div class="fs-2 fw-bold">
-                        {{ $totalOffres > 0 ? number_format($totalCandidatures / $totalOffres, 1) : 0 }}
-                    </div>
-                    <div class="text-muted small">Moy. candidatures / offre</div>
-                </div>
-            </div>
-        </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-emerald-500/20 p-6 flex flex-col items-center justify-center bg-emerald-50/50">
+        <p class="text-sm font-medium text-emerald-600 uppercase">Acceptées</p>
+        <h3 class="text-3xl font-bold text-emerald-700 mt-2">{{ $accepted }}</h3>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-amber-500/20 p-6 flex flex-col items-center justify-center bg-amber-50/50">
+        <p class="text-sm font-medium text-amber-600 uppercase">En attente</p>
+        <h3 class="text-3xl font-bold text-amber-700 mt-2">{{ $pending }}</h3>
     </div>
 </div>
 
-{{-- Dernières offres --}}
-<div class="card shadow-sm">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-        <h5 class="mb-0 fw-semibold">
-            <i class="bi bi-briefcase me-2 text-warning"></i>Mes dernières offres
-        </h5>
-        <a href="{{ route('entreprise.offres.index') }}" class="btn btn-sm btn-outline-warning">
-            Voir toutes →
-        </a>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>Titre</th>
-                        <th class="text-center">Candidatures</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($offres as $offre)
-                        <tr>
-                            <td class="fw-medium">{{ $offre->titre }}</td>
-                            <td class="text-center">
-                                <span class="badge bg-primary rounded-pill">{{ $offre->candidatures_count }}</span>
-                            </td>
-                            <td class="text-end">
-                                <a href="{{ route('entreprise.offres.edit', $offre->id) }}"
-                                   class="btn btn-sm btn-outline-secondary me-1">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="{{ route('entreprise.candidatures.index') }}"
-                                   class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-people"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="3" class="text-center text-muted py-4">
-                                <i class="bi bi-inbox me-2"></i>Aucune offre publiée.
-                                <a href="{{ route('entreprise.offres.create') }}" class="ms-2">Créer votre première offre →</a>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    {{-- Chart --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-lg font-bold text-gray-800 border-b border-gray-100 pb-4 mb-4">Entonnoir de recrutement</h3>
+        <div class="h-72 w-full">
+            <canvas id="entrepriseChart"></canvas>
         </div>
     </div>
+
+    {{-- Recent Offers --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-lg font-bold text-gray-800 border-b border-gray-100 pb-4 mb-4">Dernières Offres Publiées</h3>
+        <ul class="divide-y divide-gray-100">
+            @forelse($offres as $offre)
+                <li class="py-3 flex justify-between items-center">
+                    <div>
+                        <p class="text-sm font-bold text-gray-900">{{ $offre->titre }}</p>
+                        <p class="text-xs text-gray-500">{{ $offre->date_publication->format('d M Y') }}</p>
+                    </div>
+                    <div>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            {{ $offre->candidatures_count }} candidature(s)
+                        </span>
+                    </div>
+                </li>
+            @empty
+                <li class="py-4 text-sm text-gray-500 text-center">Aucune offre publiée.</li>
+            @endforelse
+        </ul>
+    </div>
 </div>
+
+@push('scripts')
+<script type="module">
+    import Chart from 'chart.js/auto';
+
+    const ctx = document.getElementById('entrepriseChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode($chartLabels) !!},
+            datasets: [{
+                label: 'Candidatures par statut',
+                data: {!! json_encode($chartData) !!},
+                backgroundColor: [
+                    'rgba(245, 158, 11, 0.7)',
+                    'rgba(16, 185, 129, 0.7)',
+                    'rgba(239, 68, 68, 0.7)'
+                ],
+                borderColor: [
+                    'rgb(245, 158, 11)',
+                    'rgb(16, 185, 129)',
+                    'rgb(239, 68, 68)'
+                ],
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+</script>
+@endpush
 
 @endsection
