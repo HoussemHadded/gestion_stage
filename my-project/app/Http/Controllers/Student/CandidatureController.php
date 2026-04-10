@@ -15,6 +15,23 @@ class CandidatureController extends Controller
         private readonly CandidatureService $candidatureService
     ) {}
 
+    public function index()
+    {
+        $this->authorize('viewAny', Candidature::class);
+
+        $studentId = auth()->id();
+        $page = request()->get('page', 1);
+
+        $candidatures = Cache::remember("student_candidatures_{$studentId}_page_{$page}", 300, function () use ($studentId) {
+            return Candidature::with('offre.entreprise')
+                ->where('student_id', $studentId)
+                ->latest()
+                ->paginate(10);
+        });
+
+        return view('student.candidatures', compact('candidatures'));
+    }
+
     public function create()
     {
         $this->authorize('create', Candidature::class);

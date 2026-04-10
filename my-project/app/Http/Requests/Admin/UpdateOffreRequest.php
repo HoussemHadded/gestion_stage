@@ -19,6 +19,7 @@ class UpdateOffreRequest extends FormRequest
         return [
             'titre'            => ['required', 'string', 'max:255'],
             'description'      => ['required', 'string'],
+            'lieu'             => ['nullable', 'string', 'max:255'],
             'date_publication' => ['required', 'date'],
             'entreprise_id'    => ['required', 'exists:users,id'],
         ];
@@ -30,6 +31,7 @@ class UpdateOffreRequest extends FormRequest
             'titre.required'            => 'Le titre de l\'offre est obligatoire.',
             'titre.max'                 => 'Le titre ne doit pas dépasser 255 caractères.',
             'description.required'      => 'La description de l\'offre est obligatoire.',
+            'lieu.max'                  => 'Le lieu ne doit pas dépasser 255 caractères.',
             'date_publication.required' => 'La date de publication est obligatoire.',
             'date_publication.date'     => 'La date de publication doit être une date valide.',
             'entreprise_id.required'    => "L'entreprise est obligatoire.",

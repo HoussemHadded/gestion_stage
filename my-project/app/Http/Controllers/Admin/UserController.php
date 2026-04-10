@@ -40,7 +40,7 @@ class UserController extends Controller
         
         $this->userService->store($request->validated());
 
-        return redirect()->route('users.index')
+        return redirect()->route('admin.users.index')
                          ->with('success', __('admin.user_created'));
     }
 
@@ -59,7 +59,7 @@ class UserController extends Controller
 
         $this->userService->update($user, $request->validated());
 
-        return redirect()->route('users.index')
+        return redirect()->route('admin.users.index')
                          ->with('success', __('admin.user_updated'));
     }
 
@@ -70,7 +70,7 @@ class UserController extends Controller
 
         $this->userService->delete($user);
 
-        return redirect()->route('users.index')
+        return redirect()->route('admin.users.index')
                          ->with('success', __('admin.user_deleted'));
     }
 }

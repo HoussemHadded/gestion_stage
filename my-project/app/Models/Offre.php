@@ -17,6 +17,7 @@ class Offre extends Model
     protected $fillable = [
         'titre',
         'description',
+        'lieu',
         'date_publication',
         'entreprise_id'
     ];

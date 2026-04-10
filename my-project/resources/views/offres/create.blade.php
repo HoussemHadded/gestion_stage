@@ -52,6 +52,17 @@
                         @enderror
                     </div>
 
+                    {{-- Lieu (Location) --}}
+                    <div class="mb-3">
+                        <label for="lieu" class="form-label">Lieu (Localisation)</label>
+                        <input type="text" name="lieu" id="lieu"
+                               class="form-control @error('lieu') is-invalid @enderror"
+                               value="{{ old('lieu') }}" placeholder="Ex: Paris, Remote">
+                        @error('lieu')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     {{-- Date de publication --}}
                     <div class="mb-3">
                         <label for="date_publication" class="form-label">Date de publication <span class="text-danger">*</span></label>

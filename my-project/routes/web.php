@@ -12,16 +12,16 @@ use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
-| Route principale — Redirection intelligente
+| Route principale — Landing page publique
 |--------------------------------------------------------------------------
-| Guest   → /login
+| Guest   → landing page
 | Auth    → /dashboard (qui redirige selon le rôle)
 */
 Route::get('/', function () {
     if (auth()->check()) {
         return redirect()->route('dashboard');
     }
-    return redirect()->route('login');
+    return view('landing');
 })->name('home');
 
 /*
@@ -77,6 +77,9 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/offres/{id}/edit',    [Admin\OffreController::class, 'edit'])->name('offres.edit');
         Route::put('/offres/{id}',         [Admin\OffreController::class, 'update'])->name('offres.update');
         Route::delete('/offres/{id}',      [Admin\OffreController::class, 'destroy'])->name('offres.destroy');
+
+        // Gestion globale des candidatures
+        Route::get('/candidatures',        [Admin\CandidatureController::class, 'index'])->name('candidatures.index');
     });
 
 /*
@@ -114,10 +117,12 @@ Route::middleware(['auth', 'role:student'])
     ->group(function () {
         Route::get('/dashboard', [Student\DashboardController::class, 'index'])->name('dashboard');
 
-        // Consulter les offres
-        Route::get('/offres', [Admin\OffreController::class, 'index'])->name('offres.index');
+        // Consulter les offres (via contrôleur dédié)
+        Route::get('/offres',       [Student\OffreController::class, 'index'])->name('offres.index');
+        Route::get('/offres/{id}',  [Student\OffreController::class, 'show'])->name('offres.show');
 
         // Candidatures
+        Route::get('/candidatures',        [Student\CandidatureController::class, 'index'])->name('candidatures.index');
         Route::get('/candidatures/create', [Student\CandidatureController::class, 'create'])->name('candidatures.create');
         Route::post('/candidatures',       [Student\CandidatureController::class, 'store'])->name('candidatures.store');
     });

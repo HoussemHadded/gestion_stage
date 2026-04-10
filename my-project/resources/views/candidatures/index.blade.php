@@ -84,20 +84,31 @@
                                 </span>
                             </td>
                             <td class="text-center">
-                                {{-- Formulaire PATCH de changement de statut --}}
-                                <form action="{{ route('entreprise.candidatures.updateStatut', $candidature->id) }}"
-                                      method="POST" class="d-inline-flex gap-1 align-items-center">
-                                    @csrf
-                                    @method('PATCH')
-                                    <select name="statut" class="form-select form-select-sm" style="width:130px;">
-                                        <option value="en_attente" {{ $candidature->statut->value === 'en_attente' ? 'selected' : '' }}>En attente</option>
-                                        <option value="accepte"    {{ $candidature->statut->value === 'accepte'    ? 'selected' : '' }}>Accepter</option>
-                                        <option value="refuse"     {{ $candidature->statut->value === 'refuse'     ? 'selected' : '' }}>Refuser</option>
-                                    </select>
-                                    <button type="submit" class="btn btn-sm btn-primary">
-                                        <i class="bi bi-check2"></i>
-                                    </button>
-                                </form>
+                                @if($candidature->statut->value === 'en_attente')
+                                    <form action="{{ route('entreprise.candidatures.updateStatut', $candidature->id) }}"
+                                          method="POST" class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="statut" value="accepte">
+                                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm" title="Accepter la candidature">
+                                            <i class="bi bi-check-circle me-1"></i>Accepter
+                                        </button>
+                                    </form>
+
+                                    <form action="{{ route('entreprise.candidatures.updateStatut', $candidature->id) }}"
+                                          method="POST" class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="statut" value="refuse">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-1" title="Refuser">
+                                            <i class="bi bi-x-circle me-1"></i>Refuser
+                                        </button>
+                                    </form>
+                                @else
+                                    <span class="text-muted small">
+                                        Traitée
+                                    </span>
+                                @endif
                             </td>
                         </tr>
                     @empty

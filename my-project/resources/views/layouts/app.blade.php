@@ -67,6 +67,11 @@
                                     <i class="bi bi-briefcase me-1"></i>Offres
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('admin.candidatures.index') }}">
+                                    <i class="bi bi-file-earmark-text me-1"></i>Candidatures
+                                </a>
+                            </li>
                         @endif
 
                         {{-- Entreprise --}}
@@ -101,8 +106,8 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('student.candidatures.create') }}">
-                                    <i class="bi bi-pencil-square me-1"></i>Postuler
+                                <a class="nav-link" href="{{ route('student.candidatures.index') }}">
+                                    <i class="bi bi-folder2-open me-1"></i>Mes Candidatures
                                 </a>
                             </li>
                         @endif
