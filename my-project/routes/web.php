@@ -128,4 +128,13 @@ Route::middleware(['auth', 'role:student'])
 
         // Export PDF Etudiant
         Route::get('/export/candidatures/{id}', [\App\Http\Controllers\ExportController::class, 'exportStudentCandidature'])->name('export.candidature');
+
+        // AI Matching
+        Route::get('/match',                [Student\MatchController::class, 'index'])->name('match.index');
+        Route::get('/match/{offre}',        [Student\MatchController::class, 'calculate'])->name('match.calculate');
+
+        // CV Parser & Optimizer
+        Route::get('/cv',                   [Student\CVController::class, 'show'])->name('cv.show');
+        Route::post('/cv/parse',            [Student\CVController::class, 'parseCV'])->name('cv.parse');
+        Route::get('/cv/optimize/{offre}',  [Student\CVController::class, 'optimizeCV'])->name('cv.optimize');
     });

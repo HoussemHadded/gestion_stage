@@ -75,6 +75,12 @@
                             <a href="{{ route('student.candidatures.index') }}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 hover:text-indigo-300 transition">
                                 <i class="bi bi-folder2-open mr-1"></i>Mes Candidatures
                             </a>
+                            <a href="{{ route('student.match.index') }}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 hover:text-indigo-300 transition text-yellow-400">
+                                <i class="bi bi-robot mr-1"></i>AI Matching
+                            </a>
+                            <a href="{{ route('student.cv.show') }}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800 hover:text-indigo-300 transition text-yellow-400">
+                                <i class="bi bi-file-earmark-person mr-1"></i>Mon CV (IA)
+                            </a>
                         @endif
 
                         {{-- Profile / Logout --}}

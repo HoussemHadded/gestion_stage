@@ -22,6 +22,7 @@ class User extends Authenticatable
         'role',
         'company_name',
         'company_address',
+        'cv_text',        // Raw CV text for NLP skill extraction
     ];
 
     protected $hidden = [
@@ -51,6 +52,25 @@ class User extends Authenticatable
     public function candidatures(): HasMany
     {
         return $this->hasMany(Candidature::class, 'student_id');
+    }
+
+    /**
+     * Skills belonging to this student (via student_skills pivot).
+     * Each pivot row carries a `level` field (beginner→expert).
+     */
+    public function skills(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Skill::class, 'student_skills')
+                    ->withPivot('level')
+                    ->withTimestamps();
+    }
+
+    /**
+     * AI match results stored for this student.
+     */
+    public function matches(): HasMany
+    {
+        return $this->hasMany(OffreMatch::class, 'student_id');
     }
 
     /*
