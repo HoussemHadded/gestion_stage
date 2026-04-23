@@ -16,6 +16,63 @@
     </a>
 </div>
 
+{{-- AI Insights --}}
+<div class="mb-8 p-6 bg-indigo-900 rounded-xl shadow-lg text-white">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+        <div>
+            <h3 class="text-xl font-bold flex items-center">
+                <i class="bi bi-robot mr-2 text-indigo-400"></i> Intelligence Artificielle
+            </h3>
+            <p class="text-indigo-200 text-sm mt-1">Aperçu de vos correspondances intelligentes et optimisations de CV.</p>
+        </div>
+        <a href="{{ route('student.match.index') }}" class="mt-4 md:mt-0 text-sm bg-indigo-800 hover:bg-indigo-700 px-4 py-2 rounded-lg font-medium transition">
+            <i class="bi bi-magic mr-1"></i> Améliorer mon profil
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {{-- Card 1: Matches Evaluated --}}
+        <div class="bg-indigo-800/50 rounded-lg p-5 border border-indigo-700/50">
+            <p class="text-indigo-300 text-xs uppercase tracking-wider font-semibold mb-1">Offres évaluées</p>
+            <p class="text-3xl font-extrabold">{{ $total_matches }}</p>
+        </div>
+
+        {{-- Card 2: Average Score --}}
+        <div class="bg-indigo-800/50 rounded-lg p-5 border border-indigo-700/50">
+            <p class="text-indigo-300 text-xs uppercase tracking-wider font-semibold mb-1">Score moyen</p>
+            <div class="flex items-end">
+                <p class="text-3xl font-extrabold">{{ round($average_score) }}</p>
+                <span class="text-indigo-400 ml-1 mb-1 font-medium">/ 100</span>
+            </div>
+            <div class="w-full bg-indigo-900 rounded-full h-1.5 mt-2">
+                <div class="bg-green-400 h-1.5 rounded-full" style="width: {{ $average_score }}%"></div>
+            </div>
+        </div>
+
+        {{-- Card 3: Best Score --}}
+        <div class="bg-indigo-800/50 rounded-lg p-5 border border-indigo-700/50">
+            <p class="text-indigo-300 text-xs uppercase tracking-wider font-semibold mb-1">Meilleur score</p>
+            <div class="flex items-end">
+                <p class="text-3xl font-extrabold text-yellow-400">{{ round($best_score) }}</p>
+                <span class="text-indigo-400 ml-1 mb-1 font-medium">/ 100</span>
+            </div>
+            <div class="w-full bg-indigo-900 rounded-full h-1.5 mt-2">
+                <div class="bg-yellow-400 h-1.5 rounded-full" style="width: {{ $best_score }}%"></div>
+            </div>
+        </div>
+
+        {{-- Card 4: Optimization Rate --}}
+        <div class="bg-indigo-800/50 rounded-lg p-5 border border-indigo-700/50">
+            <p class="text-indigo-300 text-xs uppercase tracking-wider font-semibold mb-1">Taux d'applications ciblées</p>
+            <div class="flex items-end">
+                <p class="text-3xl font-extrabold text-purple-400">{{ round($optimization_rate) }}</p>
+                <span class="text-indigo-400 ml-1 mb-1 font-medium">%</span>
+            </div>
+            <p class="text-xs text-indigo-300 mt-2">{{ $optimized_count }} candidatures avec un CV optimisé</p>
+        </div>
+    </div>
+</div>
+
 {{-- KPI Cards --}}
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col items-center justify-center">

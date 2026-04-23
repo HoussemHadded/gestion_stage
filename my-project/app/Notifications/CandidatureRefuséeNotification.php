@@ -8,7 +8,9 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\Candidature;
 
-class CandidatureRefuséeNotification extends Notification implements ShouldQueue
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+
+class CandidatureRefuséeNotification extends Notification implements ShouldQueue, ShouldBroadcast
 {
     use Queueable;
 
@@ -19,14 +21,9 @@ class CandidatureRefuséeNotification extends Notification implements ShouldQueu
         public Candidature $candidature
     ) {}
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database', 'broadcast'];
     }
 
     /**
@@ -34,28 +31,40 @@ class CandidatureRefuséeNotification extends Notification implements ShouldQueu
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $candidature = $this->candidature->loadMissing('offre');
-        $offreTitre = $candidature->offre->titre ?? 'cette offre de stage';
+        $candidature = $this->candidature->loadMissing('offre.entreprise');
+        $offreTitre = $candidature->offre->titre ?? 'une offre';
+        $entrepriseNom = $candidature->offre->entreprise->company_name ?? $candidature->offre->entreprise->name ?? 'une entreprise';
 
         return (new MailMessage)
-            ->subject('Réponse à votre candidature – Plateforme Stage')
+            ->subject('Mise à jour concernant votre candidature')
             ->greeting('Bonjour ' . $notifiable->name . ',')
-            ->line('Nous vous informons que votre candidature pour l\'offre **' . $offreTitre . '** n\'a malheureusement pas été retenue.')
-            ->line('Nous vous encourageons à consulter les autres offres disponibles sur la plateforme.')
-            ->action('Voir les offres', url('/offres'))
-            ->line('Bonne chance dans vos recherches !');
+            ->line('Nous vous informons que votre candidature pour l\'offre **' . $offreTitre . '** chez **' . $entrepriseNom . '** n\'a malheureusement pas été retenue.')
+            ->line('Ne vous découragez pas, d\'autres opportunités vous attendent !')
+            ->action('Voir d\'autres offres', url('/student/offres'))
+            ->line('Nous vous souhaitons une excellente continuation dans vos recherches.');
     }
 
     /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
+     * Get the array representation of the notification for the database.
      */
-    public function toArray(object $notifiable): array
+    public function toDatabase(object $notifiable): array
     {
+        $candidature = $this->candidature->loadMissing('offre.entreprise');
         return [
-            'candidature_id' => $this->candidature->id,
-            'statut' => 'refuse',
+            'type_label' => 'candidature_refusee',
+            'candidature_id' => $candidature->id,
+            'offre_titre' => $candidature->offre->titre ?? 'Offre inconnue',
+            'entreprise_name' => $candidature->offre->entreprise->company_name ?? $candidature->offre->entreprise->name ?? 'Une entreprise',
+            'message' => 'Votre candidature pour ' . ($candidature->offre->titre ?? 'une offre') . ' n\'a pas été retenue.',
+            'url' => route('student.candidatures.index')
         ];
+    }
+    
+    /**
+     * Get the array representation for broadcasting.
+     */
+    public function toBroadcast(object $notifiable): array
+    {
+        return $this->toDatabase($notifiable);
     }
 }

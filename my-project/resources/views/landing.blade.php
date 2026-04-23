@@ -29,12 +29,18 @@
                     GestionStages
                 </a>
                 <div class="flex items-center space-x-4">
-                    <a href="{{ route('login') }}" class="px-5 py-2.5 text-sm font-semibold text-white border border-white/20 rounded-xl hover:bg-white/10 hover:border-white/40 transition">
-                        Connexion
-                    </a>
-                    <a href="{{ route('register') }}" class="px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-lg hover:from-indigo-500 hover:to-purple-500 transition transform hover:-translate-y-0.5 flex items-center">
-                        Commencer <i class="bi bi-arrow-right ml-2"></i>
-                    </a>
+                    @auth
+                        <a href="{{ route('dashboard') }}" class="px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-lg hover:from-indigo-500 hover:to-purple-500 transition transform hover:-translate-y-0.5 flex items-center">
+                            Mon Dashboard <i class="bi bi-arrow-right ml-2"></i>
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}" class="px-5 py-2.5 text-sm font-semibold text-white border border-white/20 rounded-xl hover:bg-white/10 hover:border-white/40 transition">
+                            Connexion
+                        </a>
+                        <a href="{{ route('register') }}" class="px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-lg hover:from-indigo-500 hover:to-purple-500 transition transform hover:-translate-y-0.5 flex items-center">
+                            Commencer <i class="bi bi-arrow-right ml-2"></i>
+                        </a>
+                    @endauth
                 </div>
             </div>
         </div>
@@ -69,12 +75,18 @@
                     </p>
                     
                     <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                        <a href="{{ route('register') }}" class="w-full sm:w-auto px-8 py-4 text-base font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-xl hover:shadow-indigo-500/30 hover:scale-105 transition transform flex justify-center items-center">
-                            <i class="bi bi-rocket-takeoff mr-2"></i>Commencer gratuitement
-                        </a>
-                        <a href="{{ route('login') }}" class="w-full sm:w-auto px-8 py-4 text-base font-bold text-white border border-white/20 bg-white/5 backdrop-blur-md rounded-2xl hover:bg-white/10 hover:border-white/40 transition flex justify-center items-center">
-                            <i class="bi bi-box-arrow-in-right mr-2"></i>Se connecter
-                        </a>
+                        @auth
+                            <a href="{{ route('dashboard') }}" class="w-full sm:w-auto px-8 py-4 text-base font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-xl hover:shadow-indigo-500/30 hover:scale-105 transition transform flex justify-center items-center">
+                                <i class="bi bi-speedometer2 mr-2"></i>Accéder à mon espace
+                            </a>
+                        @else
+                            <a href="{{ route('register') }}" class="w-full sm:w-auto px-8 py-4 text-base font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-xl hover:shadow-indigo-500/30 hover:scale-105 transition transform flex justify-center items-center">
+                                <i class="bi bi-rocket-takeoff mr-2"></i>Commencer gratuitement
+                            </a>
+                            <a href="{{ route('login') }}" class="w-full sm:w-auto px-8 py-4 text-base font-bold text-white border border-white/20 bg-white/5 backdrop-blur-md rounded-2xl hover:bg-white/10 hover:border-white/40 transition flex justify-center items-center">
+                                <i class="bi bi-box-arrow-in-right mr-2"></i>Se connecter
+                            </a>
+                        @endauth
                     </div>
                     
                     <div class="mt-16 grid grid-cols-3 gap-6 max-w-lg mx-auto lg:mx-0 border-t border-white/10 pt-8">
@@ -206,12 +218,18 @@
             <p class="text-xl text-gray-400 mb-10">Rejoignez-nous maintenant et simplifiez drastiquement le cycle de stage conventionnel.</p>
             
             <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-                <a href="{{ route('register') }}" class="px-8 py-4 bg-white text-indigo-600 font-bold rounded-xl shadow-lg hover:bg-gray-100 transition transform hover:-translate-y-1 w-full sm:w-auto">
-                    <i class="bi bi-person-plus-fill mr-2"></i>Créer un compte
-                </a>
-                <a href="{{ route('login') }}" class="px-8 py-4 bg-transparent border border-white/30 text-white font-bold rounded-xl hover:bg-white/10 w-full sm:w-auto transition">
-                    Se connecter
-                </a>
+                @auth
+                    <a href="{{ route('dashboard') }}" class="px-8 py-4 bg-white text-indigo-600 font-bold rounded-xl shadow-lg hover:bg-gray-100 transition transform hover:-translate-y-1 w-full sm:w-auto">
+                        <i class="bi bi-arrow-right-circle-fill mr-2"></i>Aller au Dashboard
+                    </a>
+                @else
+                    <a href="{{ route('register') }}" class="px-8 py-4 bg-white text-indigo-600 font-bold rounded-xl shadow-lg hover:bg-gray-100 transition transform hover:-translate-y-1 w-full sm:w-auto">
+                        <i class="bi bi-person-plus-fill mr-2"></i>Créer un compte
+                    </a>
+                    <a href="{{ route('login') }}" class="px-8 py-4 bg-transparent border border-white/30 text-white font-bold rounded-xl hover:bg-white/10 w-full sm:w-auto transition">
+                        Se connecter
+                    </a>
+                @endauth
             </div>
         </div>
     </section>
@@ -224,8 +242,12 @@
             </div>
             <div>&copy; {{ date('Y') }} — Plateforme de gestion des stages professionnelle.</div>
             <div class="flex space-x-6">
-                <a href="{{ route('login') }}" class="hover:text-white transition">Connexion</a>
-                <a href="{{ route('register') }}" class="hover:text-white transition">Inscription</a>
+                @auth
+                    <a href="{{ route('dashboard') }}" class="hover:text-white transition">Mon Dashboard</a>
+                @else
+                    <a href="{{ route('login') }}" class="hover:text-white transition">Connexion</a>
+                    <a href="{{ route('register') }}" class="hover:text-white transition">Inscription</a>
+                @endauth
             </div>
         </div>
     </footer>

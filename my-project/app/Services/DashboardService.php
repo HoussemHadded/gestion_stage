@@ -28,7 +28,7 @@ class DashboardService
         return Cache::remember(self::CACHE_KEY, self::CACHE_TTL, function () {
             // ── Utilisateurs ──────────────────────────────────────────────
             $total_users       = User::count();
-            $total_students    = User::where('role', UserRole::Student)->count();
+            $total_students    = User::where('role', UserRole::Etudiant)->count();
             $total_entreprises = User::where('role', UserRole::Entreprise)->count();
 
             // ── Offres ────────────────────────────────────────────────────
@@ -92,13 +92,28 @@ class DashboardService
             $total_candidatures = (clone $candidatures)->count();
             
             $pending = (clone $candidatures)->where('statut', StatutCandidature::EnAttente->value)->count();
+            $shortlisted = (clone $candidatures)->where('statut', StatutCandidature::Shortlisted->value)->count();
+            $interview = (clone $candidatures)->where('statut', StatutCandidature::Interview->value)->count();
             $accepted = (clone $candidatures)->where('statut', StatutCandidature::Acceptee->value)->count();
             $rejected = (clone $candidatures)->where('statut', StatutCandidature::Refusee->value)->count();
 
-            $chartLabels = ['En Attente', 'Acceptées', 'Refusées'];
-            $chartData = [$pending, $accepted, $rejected];
+            $conversion_rate = $total_candidatures > 0 ? ($accepted / $total_candidatures) * 100 : 0;
 
-            return compact('total_offres', 'total_candidatures', 'pending', 'accepted', 'rejected', 'chartLabels', 'chartData');
+            $chartLabels = ['En Attente', 'Présélection', 'Entretien', 'Embauché', 'Refusé'];
+            $chartData = [$pending, $shortlisted, $interview, $accepted, $rejected];
+
+            // Top performing internships
+            $top_offres = Offre::where('entreprise_id', $user->id)
+                ->withCount('candidatures')
+                ->orderBy('candidatures_count', 'desc')
+                ->take(5)
+                ->get();
+
+            return compact(
+                'total_offres', 'total_candidatures', 
+                'pending', 'shortlisted', 'interview', 'accepted', 'rejected', 
+                'conversion_rate', 'chartLabels', 'chartData', 'top_offres'
+            );
         });
     }
 
@@ -115,7 +130,20 @@ class DashboardService
             $chartLabels = ['En Attente', 'Acceptées', 'Refusées'];
             $chartData = [$pending, $accepted, $rejected];
 
-            return compact('total_candidatures', 'pending', 'accepted', 'rejected', 'chartLabels', 'chartData');
+            // AI Features Stats
+            $matches = \App\Models\OffreMatch::where('student_id', $user->id);
+            $total_matches = (clone $matches)->count();
+            $average_score = $total_matches > 0 ? (clone $matches)->avg('score') : 0;
+            $best_score = $total_matches > 0 ? (clone $matches)->max('score') : 0;
+            
+            // Optimization metric: count candidatures with optimized CV vs total
+            $optimized_count = (clone $candidatures)->where('cv_version', 'optimized')->count();
+            $optimization_rate = $total_candidatures > 0 ? ($optimized_count / $total_candidatures) * 100 : 0;
+
+            return compact(
+                'total_candidatures', 'pending', 'accepted', 'rejected', 'chartLabels', 'chartData',
+                'total_matches', 'average_score', 'best_score', 'optimization_rate', 'optimized_count'
+            );
         });
     }
 }

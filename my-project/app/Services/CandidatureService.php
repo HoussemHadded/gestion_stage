@@ -23,6 +23,9 @@ class CandidatureService
 
         $candidature = Candidature::create($data);
 
+        // Dynamically compute the Match Percentage for this application
+        app(\App\Services\MatchService::class)->calculate($candidature);
+
         // Notify the enterprise owner
         $candidature->load('offre.entreprise', 'student');
         if ($candidature->offre->entreprise) {

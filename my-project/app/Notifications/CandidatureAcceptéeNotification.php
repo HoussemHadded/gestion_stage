@@ -8,7 +8,9 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\Candidature;
 
-class CandidatureAcceptéeNotification extends Notification implements ShouldQueue
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+
+class CandidatureAcceptéeNotification extends Notification implements ShouldQueue, ShouldBroadcast
 {
     use Queueable;
 
@@ -26,7 +28,7 @@ class CandidatureAcceptéeNotification extends Notification implements ShouldQue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database', 'broadcast'];
     }
 
     /**
@@ -34,28 +36,40 @@ class CandidatureAcceptéeNotification extends Notification implements ShouldQue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $candidature = $this->candidature->loadMissing('offre');
-        $offreTitre = $candidature->offre->titre ?? 'une offre de stage';
+        $candidature = $this->candidature->loadMissing('offre.entreprise');
+        $offreTitre = $candidature->offre->titre ?? 'une offre';
+        $entrepriseNom = $candidature->offre->entreprise->company_name ?? $candidature->offre->entreprise->name ?? 'une entreprise';
 
         return (new MailMessage)
-            ->subject('Bonne nouvelle : votre candidature a été acceptée – Plateforme Stage')
+            ->subject('Félicitations ! Votre candidature a été acceptée')
             ->greeting('Bonjour ' . $notifiable->name . ',')
-            ->line('Nous avons le plaisir de vous informer que votre candidature pour l\'offre **' . $offreTitre . '** a été **acceptée**.')
-            ->line('L\'entreprise va probablement vous contacter pour la suite du processus.')
-            ->action('Voir mes candidatures', url('/offres'))
-            ->line('Félicitations et bonne continuation !');
+            ->line('Excellente nouvelle ! Votre candidature pour le poste de **' . $offreTitre . '** a été **acceptée** par **' . $entrepriseNom . '**.')
+            ->line('L\'entreprise vous contactera très prochainement pour la suite des démarches.')
+            ->action('Voir ma candidature', url('/student/candidatures'))
+            ->line('Nous vous souhaitons beaucoup de succès dans votre stage !');
     }
 
     /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
+     * Get the array representation for the database.
      */
-    public function toArray(object $notifiable): array
+    public function toDatabase(object $notifiable): array
     {
+        $candidature = $this->candidature->loadMissing('offre.entreprise');
         return [
-            'candidature_id' => $this->candidature->id,
-            'statut' => 'accepte',
+            'type_label' => 'candidature_acceptee',
+            'candidature_id' => $candidature->id,
+            'offre_titre' => $candidature->offre->titre ?? 'Offre inconnue',
+            'entreprise_name' => $candidature->offre->entreprise->company_name ?? $candidature->offre->entreprise->name ?? 'Une entreprise',
+            'message' => 'Félicitations ! Votre candidature pour ' . ($candidature->offre->titre ?? 'une offre') . ' a été acceptée.',
+            'url' => route('student.candidatures.index')
         ];
+    }
+    
+    /**
+     * Get the array representation for broadcasting.
+     */
+    public function toBroadcast(object $notifiable): array
+    {
+        return $this->toDatabase($notifiable);
     }
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\Student;
 use App\Http\Controllers\Company;
 use App\Http\Controllers\Entreprise;
+use App\Http\Controllers\Encadrant;
 use App\Http\Controllers\Auth;
 use App\Http\Controllers\DashboardController;
 
@@ -18,6 +19,29 @@ use App\Http\Controllers\DashboardController;
 | Auth    → /dashboard (qui redirige selon le rôle)
 */
 Route::view('/', 'landing')->name('home');
+
+/*
+|--------------------------------------------------------------------------
+| ROUTES AUTHENTIFIÉES GÉNÉRALES
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
+    // Profil (commun à tous)
+    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Notifications (commun à tous)
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.markRead');
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
+
+    // Classement Étudiants (commun à tous)
+    Route::get('/ranking/students', [\App\Http\Controllers\RankingController::class, 'index'])->name('ranking.students');
+
+    // Assistant IA Global
+    Route::post('/assistant/chat', [\App\Http\Controllers\AssistantController::class, 'chat'])->name('assistant.chat');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -39,7 +63,7 @@ Route::post('/logout', [Auth\LoginController::class, 'logout'])
 
 /*
 |--------------------------------------------------------------------------
-| Route centrale — Redirige vers le bon dashboard selon le rôle
+| Route centrale — /dashboard rend directement la bonne vue selon le rôle
 |--------------------------------------------------------------------------
 */
 Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -55,7 +79,8 @@ Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('/dashboard', [Admin\DashboardController::class, 'index'])->name('dashboard');
+        // Dashboard — alias vers la route centrale (maintient la compatibilité des liens existants)
+        Route::get('/dashboard', fn() => redirect()->route('dashboard'))->name('dashboard');
 
         // Gestion des utilisateurs
         Route::get('/users',           [Admin\UserController::class, 'index'])->name('users.index');
@@ -91,7 +116,8 @@ Route::middleware(['auth', 'role:entreprise'])
     ->prefix('entreprise')
     ->name('entreprise.')
     ->group(function () {
-        Route::get('/dashboard', [Company\DashboardController::class, 'index'])->name('dashboard');
+        // Dashboard — alias vers la route centrale
+        Route::get('/dashboard', fn() => redirect()->route('dashboard'))->name('dashboard');
 
         // Gestion des offres (côté entreprise)
         Route::get('/offres',              [Entreprise\OffreController::class, 'index'])->name('offres.index');
@@ -103,8 +129,13 @@ Route::middleware(['auth', 'role:entreprise'])
 
         // Gestion des candidatures reçues
         Route::get('/candidatures',        [Company\CandidatureController::class, 'index'])->name('candidatures.index');
+        Route::get('/candidatures/kanban', [Company\CandidatureController::class, 'kanban'])->name('candidatures.kanban');
+        Route::post('/candidatures/{id}/status', [Company\CandidatureController::class, 'updateKanbanStatus'])->name('candidatures.kanban.update');
         Route::patch('/candidatures/{id}/accept', [Company\CandidatureController::class, 'accept'])->name('candidatures.accept');
         Route::patch('/candidatures/{id}/reject', [Company\CandidatureController::class, 'reject'])->name('candidatures.reject');
+
+        // Evaluation Intelligente des Candidats
+        Route::get('/candidats',           [Company\CandidatController::class, 'index'])->name('candidats.index');
     });
 
 /*
@@ -112,19 +143,23 @@ Route::middleware(['auth', 'role:entreprise'])
 | ÉTUDIANT
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:student'])
+Route::middleware(['auth', 'role:etudiant'])
     ->prefix('student')
     ->name('student.')
     ->group(function () {
-        Route::get('/dashboard', [Student\DashboardController::class, 'index'])->name('dashboard');
+        // Dashboard — alias vers la route centrale
+        Route::get('/dashboard', fn() => redirect()->route('dashboard'))->name('dashboard');
+
+
 
         // Consulter les offres (via contrôleur dédié)
         Route::get('/offres',       [Student\OffreController::class, 'index'])->name('offres.index');
         Route::get('/offres/{id}',  [Student\OffreController::class, 'show'])->name('offres.show');
 
-        // Candidatures
-        Route::get('/candidatures',        [Student\CandidatureController::class, 'index'])->name('candidatures.index');
+        // Candidatures & Favoris
+        Route::get('/candidatures',          [Student\CandidatureController::class, 'index'])->name('candidatures.index');
         Route::post('/offres/{id}/postuler', [Student\CandidatureController::class, 'store'])->name('offres.postuler');
+        Route::post('/offres/{id}/save',     [Student\OffreController::class, 'toggleSave'])->name('offres.save');
 
         // Export PDF Etudiant
         Route::get('/export/candidatures/{id}', [\App\Http\Controllers\ExportController::class, 'exportStudentCandidature'])->name('export.candidature');
@@ -137,4 +172,7 @@ Route::middleware(['auth', 'role:student'])
         Route::get('/cv',                   [Student\CVController::class, 'show'])->name('cv.show');
         Route::post('/cv/parse',            [Student\CVController::class, 'parseCV'])->name('cv.parse');
         Route::get('/cv/optimize/{offre}',  [Student\CVController::class, 'optimizeCV'])->name('cv.optimize');
+        Route::get('/cv/pdf/{offre}',       [Student\CVController::class, 'downloadPDF'])->name('cv.download');
+        Route::post('/apply-optimized/{offre}', [Student\CandidatureController::class, 'applyOptimized'])->name('apply.optimized');
+        
     });

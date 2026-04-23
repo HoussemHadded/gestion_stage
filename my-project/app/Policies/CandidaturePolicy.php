@@ -11,7 +11,7 @@ class CandidaturePolicy
 {
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, [UserRole::Admin, UserRole::Entreprise, UserRole::Student]);
+        return in_array($user->role, [UserRole::Admin, UserRole::Entreprise, UserRole::Etudiant]);
     }
 
     public function view(User $user, Candidature $candidature): bool
@@ -20,7 +20,7 @@ class CandidaturePolicy
             return true;
         }
 
-        if ($user->role === UserRole::Student) {
+        if ($user->role === UserRole::Etudiant) {
             return $candidature->student_id === $user->id;
         }
 
@@ -33,7 +33,7 @@ class CandidaturePolicy
 
     public function create(User $user): bool
     {
-        return $user->role === UserRole::Student;
+        return $user->role === UserRole::Etudiant;
     }
 
     public function update(User $user, Candidature $candidature): bool

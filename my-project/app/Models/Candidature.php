@@ -13,8 +13,10 @@ class Candidature extends Model
         'student_id',
         'offre_id',
         'cv',
+        'cv_version',
         'statut',
-        'date_candidature'
+        'date_candidature',
+        'match_percentage'
     ];
 
     protected $casts = [

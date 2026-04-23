@@ -8,7 +8,9 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\Candidature;
 
-class NouvelleCandidatureNotification extends Notification implements ShouldQueue
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+
+class NouvelleCandidatureNotification extends Notification implements ShouldQueue, ShouldBroadcast
 {
     use Queueable;
 
@@ -19,14 +21,9 @@ class NouvelleCandidatureNotification extends Notification implements ShouldQueu
         public Candidature $candidature
     ) {}
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database', 'broadcast'];
     }
 
     /**
@@ -49,14 +46,26 @@ class NouvelleCandidatureNotification extends Notification implements ShouldQueu
     }
 
     /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
+     * Get the array representation of the notification for the database.
      */
-    public function toArray(object $notifiable): array
+    public function toDatabase(object $notifiable): array
     {
+        $candidature = $this->candidature->loadMissing(['student', 'offre']);
         return [
-            'candidature_id' => $this->candidature->id,
+            'type_label' => 'nouvelle_candidature',
+            'candidature_id' => $candidature->id,
+            'offre_titre' => $candidature->offre->titre ?? 'Offre inconnue',
+            'student_name' => $candidature->student->name ?? 'Un étudiant',
+            'message' => 'Nouvelle candidature de ' . ($candidature->student->name ?? 'Un étudiant') . ' pour ' . ($candidature->offre->titre ?? 'votre offre'),
+            'url' => route('entreprise.candidatures.index')
         ];
+    }
+    
+    /**
+     * Get the array representation of the notification for broadcasting.
+     */
+    public function toBroadcast(object $notifiable): array
+    {
+        return $this->toDatabase($notifiable);
     }
 }

@@ -7,17 +7,15 @@ namespace App\Enums;
 enum UserRole: string
 {
     case Admin      = 'admin';
-    case Student    = 'student';
+    case Etudiant   = 'etudiant';
     case Entreprise = 'entreprise';
-
     /** Libellé affiché dans les vues */
     public function label(): string
     {
         return match ($this) {
             self::Admin      => 'Administrateur',
-            self::Student    => 'Étudiant',
-            self::Entreprise => 'Entreprise',
-        };
+            self::Etudiant   => 'Étudiant',
+            self::Entreprise => 'Entreprise',        };
     }
 
     /**
@@ -27,9 +25,8 @@ enum UserRole: string
     {
         return match ($this) {
             self::Admin      => 'admin.dashboard',
-            self::Student    => 'student.dashboard',
-            self::Entreprise => 'entreprise.dashboard',
-        };
+            self::Etudiant   => 'student.dashboard',
+            self::Entreprise => 'entreprise.dashboard',        };
     }
 
     /**
@@ -39,9 +36,8 @@ enum UserRole: string
     {
         return match ($this) {
             self::Admin      => 'badge bg-danger',
-            self::Student    => 'badge bg-primary',
-            self::Entreprise => 'badge bg-warning text-dark',
-        };
+            self::Etudiant   => 'badge bg-primary',
+            self::Entreprise => 'badge bg-warning text-dark',        };
     }
 
     /**

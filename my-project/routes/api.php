@@ -24,4 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+
+    // Admin : Mettre à jour le rôle
+    Route::middleware('role:admin')->patch('/users/{id}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole']);
 });

@@ -54,8 +54,34 @@ class CandidatureController extends Controller
             'student_id' => auth()->id(),
             'offre_id' => $id,
             'cv' => 'Candidature simplifiée',
+            'cv_version' => 'original',
         ]);
 
         return back()->with('success', 'Candidature envoyée avec succès');
+    }
+
+    public function applyOptimized(\Illuminate\Http\Request $request, Offre $offre)
+    {
+        if (auth()->user()->role->value !== 'student') {
+            abort(403, 'Accès non autorisé.');
+        }
+
+        $alreadyApplied = Candidature::where('student_id', auth()->id())
+            ->where('offre_id', $offre->id)
+            ->exists();
+
+        if ($alreadyApplied) {
+            return redirect()->route('student.match.index')->with('error', 'Vous avez déjà postulé à cette offre.');
+        }
+
+        $this->candidatureService->store([
+            'student_id' => auth()->id(),
+            'offre_id' => $offre->id,
+            'cv' => "CV Optimisé via IA", // Simulated file path/name
+            'cv_version' => 'optimized',
+        ]);
+
+        return redirect()->route('student.candidatures.index')
+            ->with('success', 'Candidature avec le CV optimisé envoyée avec succès !');
     }
 }

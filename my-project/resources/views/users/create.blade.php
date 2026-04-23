@@ -57,9 +57,10 @@
                         <select name="role" id="role"
                                 class="form-select @error('role') is-invalid @enderror" required>
                             <option value="">-- Sélectionner un rôle --</option>
-                            <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin</option>
-                            <option value="student" {{ old('role') === 'student' ? 'selected' : '' }}>Étudiant</option>
+                            <option value="admin"      {{ old('role') === 'admin'      ? 'selected' : '' }}>Admin</option>
+                            <option value="etudiant"   {{ old('role') === 'etudiant'   ? 'selected' : '' }}>Étudiant</option>
                             <option value="entreprise" {{ old('role') === 'entreprise' ? 'selected' : '' }}>Entreprise</option>
+                            <option value="encadrant"  {{ old('role') === 'encadrant'  ? 'selected' : '' }}>Encadrant</option>
                         </select>
                         @error('role')
                             <div class="invalid-feedback">{{ $message }}</div>

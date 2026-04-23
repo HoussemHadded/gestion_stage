@@ -13,7 +13,7 @@ class UserSeeder extends Seeder
             'name' => 'Houssem',
             'email' => 'houssem@example.com',
             'password' => bcrypt('password'),
-            'role' => 'admin',
+            'role' => \App\Enums\UserRole::Admin->value,
         ]);
     }
 }

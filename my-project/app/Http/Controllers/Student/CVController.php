@@ -44,7 +44,11 @@ class CVController extends Controller
         try {
             // Service handles AI NLP extraction and DB syncing
             $this->cvService->parseCV($student);
-            return redirect()->route('student.cv.show')->with('success', 'CV analysé avec succès ! Vos compétences ont été extraites.');
+            
+            // Recalculate intelligent CV score immediately
+            app(\App\Services\CVScoringService::class)->score($student);
+            
+            return redirect()->route('student.cv.show')->with('success', 'CV analysé avec succès ! Vos compétences ont été extraites et votre profil réévalué.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Erreur lors de l\'analyse du CV : ' . $e->getMessage());
         }
@@ -69,6 +73,34 @@ class CVController extends Controller
             return view('student.ai.cv-optimize', compact('student', 'offre', 'optimization'));
         } catch (\Exception $e) {
             return redirect()->route('student.match.index')->with('error', 'Erreur lors de l\'optimisation : ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download the optimized CV as a PDF.
+     */
+    public function downloadPDF(Offre $offre)
+    {
+        $student = Auth::user();
+        
+        if (empty($student->cv_text)) {
+            return redirect()->route('student.cv.show')
+                ->with('error', 'Impossible de générer le PDF : Aucun CV trouvé.');
+        }
+
+        try {
+            // Get skills
+            $skills = $student->skills()->get();
+            
+            // Re-run optimization (ideally this could be cached to save API calls, but we run it for freshness)
+            $optimization = $this->cvService->optimizeCV($student, $offre);
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.optimized_cv', compact('student', 'offre', 'skills', 'optimization'));
+            
+            return $pdf->download('CV_Optimise_' . str_replace(' ', '_', $student->name) . '.pdf');
+            
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Erreur lors de la génération du PDF : ' . $e->getMessage());
         }
     }
 }

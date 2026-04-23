@@ -46,7 +46,7 @@
                 class="w-full bg-gray-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-inner @error('role') border-red-500 @enderror"
                 required>
             <option value="" class="text-gray-400">-- Sélectionner votre profil --</option>
-            <option value="student"    {{ old('role') === 'student'    ? 'selected' : '' }}>🎓 Étudiant</option>
+            <option value="etudiant"   {{ old('role') === 'etudiant'   ? 'selected' : '' }}>🎓 Étudiant</option>
             <option value="entreprise" {{ old('role') === 'entreprise' ? 'selected' : '' }}>🏢 Entreprise</option>
         </select>
         @error('role')

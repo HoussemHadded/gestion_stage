@@ -19,10 +19,6 @@
         <a href="{{ route('entreprise.offres.create') }}" class="btn btn-warning">
             <i class="bi bi-plus-circle me-1"></i>Publier une Offre
         </a>
-    @elseif(auth()->user()->isStudent())
-        <a href="{{ route('student.candidatures.create') }}" class="btn btn-success">
-            <i class="bi bi-pencil-square me-1"></i>Postuler
-        </a>
     @endif
 </div>
 
@@ -41,9 +37,7 @@
                         @if(auth()->user()->isAdmin() || auth()->user()->isEntreprise())
                             <th class="text-center">Actions</th>
                         @endif
-                        @if(auth()->user()->isStudent())
-                            <th class="text-center">Action</th>
-                        @endif
+
                     </tr>
                 </thead>
                 <tbody>
@@ -93,15 +87,7 @@
                                 </td>
                             @endif
 
-                            {{-- Action Étudiant —  Postuler --}}
-                            @if(auth()->user()->isStudent())
-                                <td class="text-center">
-                                    <a href="{{ route('student.candidatures.create') }}?offre_id={{ $offre->id }}"
-                                       class="btn btn-sm btn-success">
-                                        <i class="bi bi-send me-1"></i>Postuler
-                                    </a>
-                                </td>
-                            @endif
+                            {{-- Action Étudiant removed here because students use student/offres directly --}}
                         </tr>
                     @empty
                         <tr>

@@ -23,6 +23,7 @@ class User extends Authenticatable
         'company_name',
         'company_address',
         'cv_text',        // Raw CV text for NLP skill extraction
+        'cv_score',       // AI Evaluation
     ];
 
     protected $hidden = [
@@ -73,6 +74,15 @@ class User extends Authenticatable
         return $this->hasMany(OffreMatch::class, 'student_id');
     }
 
+    /**
+     * Les offres favorites/sauvegardées par l'étudiant.
+     */
+    public function savedOffres(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Offre::class, 'saved_offres', 'user_id', 'offre_id')
+                    ->withTimestamps();
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Role Helpers
@@ -84,13 +94,21 @@ class User extends Authenticatable
         return $this->role === UserRole::Admin;
     }
 
+    public function isEtudiant(): bool
+    {
+        return $this->role === UserRole::Etudiant;
+    }
+
+    /** Alias backward-compatibility */
     public function isStudent(): bool
     {
-        return $this->role === UserRole::Student;
+        return $this->isEtudiant();
     }
 
     public function isEntreprise(): bool
     {
         return $this->role === UserRole::Entreprise;
     }
+
+
 }

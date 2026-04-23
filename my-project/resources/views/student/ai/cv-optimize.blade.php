@@ -87,13 +87,24 @@
             </p>
         </div>
         
-        <div class="mt-6 text-center">
-             <form action="{{ route('student.offres.postuler', $offre->id) }}" method="POST">
+        <div class="mt-6 text-center flex flex-wrap justify-center gap-4">
+             <form action="{{ route('student.offres.postuler', $offre->id) }}" method="POST" class="inline-block">
                 @csrf
-                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded shadow transition">
-                    <i class="bi bi-send mr-2"></i> J'ai mis à jour mon CV, Postuler !
+                <button type="submit" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded shadow transition">
+                    <i class="bi bi-send mr-2"></i> Postuler avec CV normal
                 </button>
             </form>
+            
+            <form action="{{ route('student.apply.optimized', $offre->id) }}" method="POST" class="inline-block">
+                @csrf
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded shadow transition">
+                    <i class="bi bi-rocket-takeoff mr-2"></i> 🚀 Appliquer avec le CV optimisé
+                </button>
+            </form>
+            
+            <a href="{{ route('student.cv.download', $offre->id) }}" target="_blank" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded shadow transition flex items-center inline-flex">
+                <i class="bi bi-file-pdf mr-2"></i> Télécharger CV (PDF)
+            </a>
         </div>
     </div>
 </div>

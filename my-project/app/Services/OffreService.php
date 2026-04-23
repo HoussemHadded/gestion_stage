@@ -15,6 +15,10 @@ class OffreService
         $offre = Offre::create($data);
 
         $this->cacheService->forgetOffres();
+        
+        // Notify all students in the background
+        $students = \App\Models\User::where('role', \App\Enums\UserRole::Etudiant)->get();
+        \Illuminate\Support\Facades\Notification::send($students, new \App\Notifications\NouvelleOffreNotification($offre));
 
         return $offre;
     }
