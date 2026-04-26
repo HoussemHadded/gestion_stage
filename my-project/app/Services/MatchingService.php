@@ -143,7 +143,7 @@ class MatchingService
             $score = (float) $maxWeight;
             $reason = "Niveau '$reqLevel' détecté dans le profil/CV.";
         } else {
-            $score = 0; // Strict penalty for not having the level
+            $score = $maxWeight * 0.5; // ATS neutral score for unspecified level
             $reason = "Niveau '$reqLevel' non repéré explicitement dans le CV.";
         }
 
@@ -168,8 +168,8 @@ class MatchingService
             $score = (float) $maxWeight;
             $reason = "Localisation compatible avec '$offLieu'.";
         } else {
-            $score = 0;
-            $reason = "La localisation pourrait être un obstacle (à confirmer).";
+            $score = $maxWeight * 0.5; // ATS neutral score for unconfirmed relocation
+            $reason = "La localisation n'est pas explicitement confirmée dans le CV.";
         }
 
         $details['location'] = ['score' => $score, 'reason' => $reason];
@@ -200,7 +200,7 @@ class MatchingService
             $score = (float) $maxWeight;
             $reason = "Le type de stage '$offre->type' correspond au profil.";
         } else {
-            $score = 0;
+            $score = $maxWeight * 0.5; // ATS neutral score
             $reason = "Le format '$offre->type' n'est pas explicitement demandé dans le CV.";
         }
         
