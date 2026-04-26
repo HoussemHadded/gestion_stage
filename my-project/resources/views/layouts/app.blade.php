@@ -384,70 +384,75 @@
 
     {{-- ======================== SMART ASSISTANT IA ======================== --}}
     @auth
-    <div id="smart-assistant" class="fixed bottom-20 right-4 md:bottom-8 md:right-8 z-[9999] font-sans" x-data="{ open: false }">
+    <div id="smart-assistant" class="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[9999] font-sans" x-data="{ open: false }">
+        
         <!-- Chat Button -->
         <button id="sa-toggle-btn" @click="open = !open" 
-                class="bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-full h-14 w-14 flex items-center justify-center shadow-[0_8px_30px_rgb(79,70,229,0.4)] transform transition-transform duration-300 hover:scale-110 border border-white/20 dark:border-gray-800/50 focus:outline-none group">
+                class="bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-full h-14 w-14 flex items-center justify-center shadow-[0_8px_30px_rgb(79,70,229,0.4)] transform transition-transform duration-300 hover:scale-110 focus:outline-none group border border-white/10">
             <i class="bi bi-chat-dots-fill text-2xl transition-transform duration-300 group-hover:rotate-12" x-show="!open"></i>
-            <i class="bi bi-x-lg text-2xl font-bold" x-show="open" style="display: none;"></i>
+            <i class="bi bi-x-lg text-2xl font-bold" x-show="open" x-cloak></i>
         </button>
 
         <!-- Chat Window -->
-        <div x-show="open" 
+        <div x-cloak x-show="open" 
              @click.away="open = false"
-             style="display: none;"
-             x-transition:enter="transition ease-out duration-300 transform"
-             x-transition:enter-start="opacity-0 translate-y-8 scale-90"
-             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-             x-transition:leave="transition ease-in duration-200 transform"
-             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-             x-transition:leave-end="opacity-0 translate-y-8 scale-90"
-             class="absolute bottom-16 right-0 md:bottom-16 md:right-0 w-[calc(100vw-2rem)] md:w-96 bg-white/95 backdrop-blur-xl dark:bg-gray-900/95 rounded-3xl shadow-[0_8px_40px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_40px_rgb(0,0,0,0.5)] border border-gray-100 dark:border-gray-700/50 flex flex-col overflow-hidden" 
-             style="height: 550px; max-height: 85vh;">
+             x-transition:enter="transition ease-out duration-300 transform origin-bottom-right"
+             x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200 transform origin-bottom-right"
+             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+             x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+             class="fixed bottom-0 right-0 w-full h-[85vh] sm:h-[90vh] md:absolute md:bottom-20 md:right-0 md:w-[380px] md:h-[500px] bg-gray-900 border-t border-gray-800 md:border md:rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50 rounded-t-3xl md:rounded-t-2xl">
             
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 text-white flex items-center justify-between shadow-sm z-10 border-b border-white/10">
+            <!-- Sticky Header -->
+            <div class="shrink-0 bg-gray-800 p-4 flex items-center justify-between border-b border-gray-700/80 shadow-sm relative z-20">
                 <div class="flex items-center">
                     <div class="relative">
-                        <div class="bg-white/20 p-2 rounded-xl backdrop-blur-sm mr-3">
-                            <i class="bi bi-robot text-xl"></i>
+                        <div class="bg-gray-900 border border-gray-700 p-2 rounded-xl mr-3 shadow-inner">
+                            <i class="bi bi-robot text-xl text-indigo-400"></i>
                         </div>
-                        <span class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-indigo-600 rounded-full animate-pulse"></span>
+                        <span class="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-gray-800 rounded-full animate-pulse"></span>
                     </div>
                     <div>
-                        <h3 class="font-bold text-md tracking-wide leading-tight">Coach IA</h3>
-                        <p class="text-xs text-indigo-100 opacity-90">En ligne (Local)</p>
+                        <h3 class="font-bold text-sm text-white tracking-wide">Coach IA</h3>
+                        <p class="text-[11px] text-gray-400 font-medium">Toujours là pour vous aider</p>
                     </div>
                 </div>
-                <button @click="open = false" class="text-indigo-200 hover:text-white transition focus:outline-none bg-white/10 hover:bg-white/20 p-1.5 rounded-full">
-                    <i class="bi bi-chevron-down text-lg"></i>
-                </button>
-            </div>
-
-            <!-- Messages Area -->
-            <div id="sa-messages" class="flex-grow p-4 overflow-y-auto bg-gray-50/50 dark:bg-gray-800/30 flex flex-col space-y-4 scroll-smooth">
-                <!-- Messages will be injected here automatically -->
-            </div>
-
-            <!-- Typing Indicator (Hidden by default) -->
-            <div id="sa-typing" class="hidden px-4 pb-2 bg-transparent">
-                <div class="flex items-center text-xs text-gray-400 dark:text-gray-500 font-medium tracking-wide">
-                    L'IA réfléchit<span class="flex ml-1.5 space-x-1"><span class="w-1 h-1 bg-gray-400 rounded-full animate-bounce"></span><span class="w-1 h-1 bg-gray-400 rounded-full animate-bounce delay-100"></span><span class="w-1 h-1 bg-gray-400 rounded-full animate-bounce delay-200"></span></span>
+                <div class="flex items-center space-x-1">
+                    <button @click="open = false" class="text-gray-400 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-gray-700 focus:outline-none">
+                        <i class="bi bi-dash-lg text-lg"></i>
+                    </button>
+                    <button @click="open = false" class="text-gray-400 hover:text-red-400 transition-colors p-1.5 rounded-lg hover:bg-gray-700 focus:outline-none md:hidden">
+                        <i class="bi bi-x-lg text-lg"></i>
+                    </button>
                 </div>
             </div>
 
-            <!-- Input Area -->
-            <div class="bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-700/50 p-4 z-10">
-                <form id="sa-form" class="flex items-center relative gap-2">
+            <!-- Messages Area (Scrollable) -->
+            <div id="sa-messages" class="flex-1 overflow-y-auto p-4 bg-gray-900 flex flex-col space-y-4 relative z-10 scroll-smooth scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+                <!-- Messages injected here -->
+            </div>
+
+            <!-- Typing Indicator -->
+            <div id="sa-typing" class="hidden px-4 pb-3 bg-gray-900 shrink-0">
+                <div class="flex items-center text-xs font-bold text-gray-500 tracking-widest uppercase">
+                    L'IA écrit<span class="flex ml-1.5 space-x-1"><span class="w-1 h-1 bg-gray-500 rounded-full animate-bounce"></span><span class="w-1 h-1 bg-gray-500 rounded-full animate-bounce delay-100"></span><span class="w-1 h-1 bg-gray-500 rounded-full animate-bounce delay-200"></span></span>
+                </div>
+            </div>
+
+            <!-- Sticky Input Area -->
+            <div class="shrink-0 bg-gray-800 border-t border-gray-700/80 p-3 flex flex-col space-y-2 relative z-20">
+                <div id="sa-suggestions" class="flex flex-wrap gap-1.5 pb-1"></div>
+                <form id="sa-form" class="flex items-center relative gap-2 w-full">
                     <input type="text" id="sa-input" required autocomplete="off"
-                           class="w-full bg-gray-100/80 dark:bg-gray-800/80 border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-gray-700 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 text-sm rounded-2xl py-3 pl-4 pr-12 text-gray-700 dark:text-gray-200 shadow-inner transition-all duration-200"
-                           placeholder="Posez-moi une question...">
-                    <button type="submit" class="absolute right-1.5 top-1.5 bottom-1.5 bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl w-10 flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none transform hover:scale-105">
-                        <i class="bi bi-send-fill text-[12px]"></i>
+                           class="w-full bg-gray-900 border border-gray-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-sm font-medium rounded-xl py-3 pl-4 pr-12 text-white placeholder-gray-500 transition-all outline-none shadow-inner"
+                           placeholder="Posez votre question...">
+                    <button type="submit" class="absolute right-1.5 top-1.5 bottom-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg w-9 flex items-center justify-center transition-colors shadow-sm focus:outline-none">
+                        <i class="bi bi-send-fill text-sm"></i>
                     </button>
                 </form>
-                <div class="text-[10px] text-center text-gray-400 mt-2 font-medium tracking-wide">
-                    Propulsé par le Moteur Intelligent Local
+                <div class="text-center text-[9px] text-gray-500 tracking-widest uppercase font-bold">
+                    Propulsé par le Moteur IA
                 </div>
             </div>
         </div>
@@ -463,55 +468,58 @@
             const typing = document.getElementById('sa-typing');
             let hasWelcomed = false;
 
-            // Secure HTML encode helper
             const encodeHTML = (str) => {
                 let p = document.createElement("p");
                 p.textContent = str;
                 return p.innerHTML;
             };
 
+            const scrollToBottom = () => {
+                // Ensure scroll reaches the very bottom
+                requestAnimationFrame(() => {
+                    messages.scrollTo({
+                        top: messages.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                });
+            };
+
             const addMessage = (text, isUser = false) => {
                 const div = document.createElement('div');
-                div.className = `flex items-start ${isUser ? 'justify-end' : ''} animate-fade-in-up`;
-                
-                // Keep raw HTML for bot responses if we send basic formatting, 
-                // but since it's local we trust it or we can just encode all. 
-                // The text might contain <strong> tags from our own JS logic.
-                const safeText = isUser ? encodeHTML(text) : text; // We allow bot text to have basic formatting
+                div.className = `flex items-start ${isUser ? 'justify-end' : ''} animate-fade-in-up w-full`;
+                const safeText = isUser ? encodeHTML(text) : text;
                 
                 if (isUser) {
                     div.innerHTML = `
-                        <div class="mr-2 bg-gradient-to-br from-indigo-600 to-indigo-700 p-3.5 rounded-2xl rounded-tr-sm shadow-md max-w-[85%] text-sm text-white break-words tracking-wide">
+                        <div class="ml-12 bg-indigo-600 p-3 rounded-2xl rounded-tr-sm shadow-sm text-[13px] font-medium text-white break-words leading-relaxed border border-indigo-500/50">
                              ${safeText}
                         </div>
                     `;
                 } else {
                     div.innerHTML = `
-                        <div class="flex-shrink-0 bg-gradient-to-tr from-indigo-100 to-purple-100 dark:from-indigo-900/60 dark:to-purple-900/60 rounded-xl h-9 w-9 flex items-center justify-center border border-indigo-200 dark:border-indigo-700/50 shadow-sm mt-1">
-                            <i class="bi bi-robot text-indigo-600 dark:text-indigo-400 text-sm"></i>
+                        <div class="flex-shrink-0 bg-gray-800 rounded-xl h-8 w-8 flex items-center justify-center shadow-sm mt-1 border border-gray-700">
+                            <i class="bi bi-robot text-indigo-400 text-xs"></i>
                         </div>
-                        <div class="ml-3 bg-white dark:bg-gray-800 p-3.5 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100 dark:border-gray-700 max-w-[85%] text-sm text-gray-700 dark:text-gray-200 break-words leading-relaxed tracking-wide">
+                        <div class="mr-12 ml-2 bg-gray-800 p-3 rounded-2xl rounded-tl-sm border border-gray-700 shadow-sm text-[13px] font-medium text-gray-200 break-words leading-relaxed">
                             ${safeText}
                         </div>
                     `;
                 }
                 
                 messages.appendChild(div);
-                messages.scrollTop = messages.scrollHeight;
+                scrollToBottom();
             };
 
-            // Automatic Welcome Message Trigger
             document.getElementById('sa-toggle-btn').addEventListener('click', function() {
                 if (!hasWelcomed) {
                     hasWelcomed = true;
                     setTimeout(() => {
                         typing.classList.remove('hidden');
-                        messages.scrollTop = messages.scrollHeight;
+                        scrollToBottom();
                         setTimeout(() => {
                             typing.classList.add('hidden');
-                            // Fallback user name safe rendering
                             const userName = <?php echo json_encode(auth()->check() ? auth()->user()->name : ''); ?>;
-                            const welcomeMsg = `Bonjour <strong>${encodeHTML(userName)}</strong> ! 👋 Je suis votre assistant. Comment puis-je optimiser votre expérience aujourd'hui ?`;
+                            const welcomeMsg = `Bonjour <strong>${encodeHTML(userName)}</strong> ! 👋 Je suis votre assistant virtuel. Comment puis-je vous aider aujourd'hui ?`;
                             addMessage(welcomeMsg, false);
                         }, 800);
                     }, 300);
@@ -523,19 +531,16 @@
                 const text = input.value.trim();
                 if (!text) return;
 
-                // Add user message
                 addMessage(text, true);
                 input.value = '';
                 input.disabled = true;
                 
-                // Show typing
                 typing.classList.remove('hidden');
-                messages.scrollTop = messages.scrollHeight;
+                scrollToBottom();
 
                 const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
                 const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
 
-                // Fetch AI API local endpoint
                 fetch('/assistant/chat', {
                     method: 'POST',
                     headers: {
@@ -553,18 +558,15 @@
                     return response.json();
                 })
                 .then(data => {
-                    // Simulate typing delay based on string length (min 600ms, max 1500ms)
                     const delay = Math.min(Math.max((data.reply || '').length * 15, 600), 1500);
                     setTimeout(() => {
                         typing.classList.add('hidden');
-                        // Encode the server reply since it might be pure text, then we render
                         addMessage(data.reply ? encodeHTML(data.reply) : 'Désolé, je ne sais pas quoi répondre.', false);
                         input.disabled = false;
                         input.focus();
                     }, delay);
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     setTimeout(() => {
                         typing.classList.add('hidden');
                         addMessage("Désolé, une erreur technique m'empêche de vous répondre. Réessayez plus tard.", false);
@@ -573,22 +575,68 @@
                     }, 500);
                 });
             });
+
+            // --- Suggestions Logic ---
+            const suggestionsData = {
+                'cv': [
+                    "Comment améliorer mon CV ?",
+                    "Quelles compétences ajouter ?",
+                    "Corriger mon CV"
+                ],
+                'candidatures': [
+                    "Suivre mes candidatures",
+                    "Comment relancer une entreprise ?",
+                    "Conseils entretien"
+                ],
+                'match': [
+                    "Explique mon score Match",
+                    "Comment atteindre 90% ?",
+                    "Entreprises recommandées"
+                ],
+                'default': [
+                    "Je cherche un stage",
+                    "Entreprises recommandées",
+                    "Conseils pour mon stage"
+                ]
+            };
+
+            const renderSuggestions = () => {
+                const path = window.location.pathname.toLowerCase();
+                let list = suggestionsData['default'];
+                
+                if (path.includes('/cv') || path.includes('/profile')) list = suggestionsData['cv'];
+                else if (path.includes('/candidature')) list = suggestionsData['candidatures'];
+                else if (path.includes('/match') || path.includes('/offre')) list = suggestionsData['match'];
+                
+                const container = document.getElementById('sa-suggestions');
+                if(!container) return;
+                
+                container.innerHTML = '';
+                list.forEach(text => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'px-3 py-1.5 text-[11px] font-medium tracking-wide bg-gray-700/40 hover:bg-gray-700 text-gray-300 hover:text-white transition-colors rounded-full text-left leading-tight border border-gray-600/30';
+                    btn.innerText = text;
+                    btn.onclick = () => {
+                        input.value = text;
+                        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                        container.style.opacity = '0';
+                        setTimeout(() => container.style.display = 'none', 300);
+                    };
+                    container.appendChild(btn);
+                });
+            };
+
+            renderSuggestions();
         });
     </script>
     <style>
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
-        .animate-fade-in-up {
-            animation: fadeInUp 0.3s ease-out forwards;
-        }
+        .animate-fade-in-up { animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        #sa-suggestions { transition: opacity 0.3s ease; }
     </style>
     @endauth
 </body>
