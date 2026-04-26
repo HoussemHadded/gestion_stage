@@ -17,32 +17,49 @@ class CandidatController extends Controller
     {
         $entreprise = Auth::user();
 
-        // Base query: fetch candidatures restricted to this company's offers
+        // Optimized query: Eager load student skills to avoid N+1
         $query = Candidature::whereHas('offre', function ($q) use ($entreprise) {
             $q->where('entreprise_id', $entreprise->id);
-        })->with(['student', 'offre']);
+        })->with(['student', 'student.skills', 'offre'])
+          ->select('candidatures.*'); // Ensure we select only candidature columns primarily
 
         // Handle Filters
         if ($request->filled('offre_id')) {
             $query->where('offre_id', $request->offre_id);
         }
 
+        if ($request->filled('min_match')) {
+            $query->where('match_percentage', '>=', $request->min_match);
+        }
+
+        if ($request->filled('min_score')) {
+            $query->whereHas('student', function ($q) use ($request) {
+                $q->where('cv_score', '>=', $request->min_score);
+            });
+        }
+
+        if ($request->filled('skill')) {
+            $query->whereHas('student.skills', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->skill . '%');
+            });
+        }
+
         // Handle Sorting
         $sort = $request->get('sort', 'latest');
+        $direction = $request->get('dir', 'desc') === 'asc' ? 'asc' : 'desc';
+
         if ($sort === 'cv_score') {
-            // Join students to sort securely by their cv_score
             $query->join('users', 'candidatures.student_id', '=', 'users.id')
-                  ->orderBy('users.cv_score', 'desc')
-                  ->select('candidatures.*');
+                  ->orderBy('users.cv_score', $direction);
         } elseif ($sort === 'match') {
-            $query->orderBy('match_percentage', 'desc');
+            $query->orderBy('match_percentage', $direction);
         } else {
-            $query->latest();
+            $query->orderBy('candidatures.created_at', $direction);
         }
 
         $candidates = $query->paginate(12)->withQueryString();
         $offres = $entreprise->offres()->select('id', 'titre')->get();
 
-        return view('entreprise.candidats.index', compact('candidates', 'offres', 'sort'));
+        return view('entreprise.candidats.index', compact('candidates', 'offres', 'sort', 'direction'));
     }
 }

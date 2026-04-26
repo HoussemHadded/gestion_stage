@@ -8,35 +8,42 @@ use App\Enums\UserRole;
 class StudentRankingService
 {
     /**
-     * Gets ordered list of top students for the leaderboard.
+     * Gets ordered list of top candidates for the leaderboard.
      */
-    public function getTopStudents(int $limit = 10)
+    public function getTopCandidates(int $limit = 10)
     {
-        // For performance and dynamic ranking, we fetch all students with their candidatures
-        // In a massively scaled app, this would be computed via background jobs or direct DB complex joins.
+        // Fetch candidates with their activity level and average match
         $students = User::where('role', UserRole::Etudiant)
-            ->withCount(['candidatures as accepted_candidatures_count' => function ($query) {
-                // Assuming StatutCandidature::ACCEPTEE string is 'acceptee' or similar
-                $query->where('statut', 'acceptee');
-            }])
+            ->withCount('candidatures as activity_level')
             ->withAvg('candidatures as average_match', 'match_percentage')
-            ->orderBy('cv_score', 'desc')
-            ->orderBy('average_match', 'desc')
-            ->take($limit)
             ->get();
 
-        // Calculate Global Rank Score dynamically (just for display if needed)
-        // Global Score = (CV Score * 0.5) + (Average Match * 0.3) + (Accepted * 20 max capped)
-        $students->each(function ($student) {
-            $acceptedBonus = min($student->accepted_candidatures_count * 10, 20);
-            $student->global_rank_score = round(
-                (($student->cv_score ?? 0) * 0.5) +
-                (($student->average_match ?? 0) * 0.3) +
-                $acceptedBonus
-            );
+        // Sort by CV Score (1st), Average Match (2nd), Activity Level (3rd)
+        $sortedStudents = $students->sort(function ($a, $b) {
+            $scoreA = $a->cv_score ?? 0;
+            $scoreB = $b->cv_score ?? 0;
+            if ($scoreA !== $scoreB) {
+                return $scoreB <=> $scoreA;
+            }
+
+            $matchA = $a->average_match ?? 0;
+            $matchB = $b->average_match ?? 0;
+            if ($matchA !== $matchB) {
+                return $matchB <=> $matchA;
+            }
+
+            $activityA = $a->activity_level ?? 0;
+            $activityB = $b->activity_level ?? 0;
+            return $activityB <=> $activityA;
+        })->take($limit)->values();
+
+        // Assign dynamic medals
+        $medals = ['🥇', '🥈', '🥉'];
+        $sortedStudents->each(function ($student, $index) use ($medals) {
+            $student->medal = $index < 3 ? $medals[$index] : null;
+            $student->global_rank = $index + 1;
         });
 
-        // Final sort purely by the computed global rank score descending
-        return $students->sortByDesc('global_rank_score')->values();
+        return $sortedStudents;
     }
 }

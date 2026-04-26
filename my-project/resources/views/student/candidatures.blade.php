@@ -48,17 +48,27 @@
                             {{ $candidature->date_candidature ? $candidature->date_candidature->format('d/m/Y') : '—' }}
                         </td>
                         <td class="px-6 py-4">
-                            @if($candidature->statut->value === 'en attente')
+                            @php $statutValue = $candidature->statut->value; @endphp
+
+                            @if($statutValue === 'en_attente')
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-                                    {{ $candidature->statut->label() }}
+                                    <i class="bi bi-clock-history mr-1"></i>{{ $candidature->statut->label() }}
                                 </span>
-                            @elseif($candidature->statut->value === 'acceptée')
+                            @elseif($statutValue === 'shortlisted')
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-sky-100 text-sky-800">
+                                    <i class="bi bi-bookmark-star mr-1"></i>{{ $candidature->statut->label() }}
+                                </span>
+                            @elseif($statutValue === 'interview')
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800">
+                                    <i class="bi bi-camera-video mr-1"></i>{{ $candidature->statut->label() }}
+                                </span>
+                            @elseif($statutValue === 'accepte')
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
-                                    {{ $candidature->statut->label() }}
+                                    <i class="bi bi-check-circle-fill mr-1"></i>{{ $candidature->statut->label() }}
                                 </span>
                             @else
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800">
-                                    {{ $candidature->statut->label() }}
+                                    <i class="bi bi-x-circle-fill mr-1"></i>{{ $candidature->statut->label() }}
                                 </span>
                             @endif
 

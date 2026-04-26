@@ -8,16 +8,32 @@ use App\Models\OffreMatch;
 
 class MatchingService
 {
+    private const SKILL_DICT = [
+        'php', 'laravel', 'symfony', 'wordpress', 'javascript', 'typescript', 'node.js', 'react', 'vue', 'angular',
+        'next.js', 'python', 'django', 'flask', 'fastapi', 'sql', 'mysql', 'postgresql', 'mongodb', 'docker', 'kubernetes',
+        'aws', 'azure', 'gcp', 'git', 'linux', 'html', 'css', 'tailwind', 'figma', 'ui/ux', 'tensorflow', 'pytorch',
+        'nlp', 'data science', 'marketing', 'finance', 'excel', 'agile', 'scrum', 'testing', 'qa', 'cybersécurité',
+        'java', 'spring', 'hibernate', 'c++', 'c#', 'dotnet', 'ruby', 'rails', 'go', 'rust', 'flutter', 'kotlin'
+    ];
+
     /**
      * Calculate and store the compatibility score between a student and an offer.
      * Pure PHP rule-based scoring (0-100) to avoid API dependency for bulk operations.
      *
      * @param User $student
      * @param Offre $offre
-     * @return array The calculated score and details
+     * @return array|null The calculated score and details, or null if no CV data
      */
-    public function calculate(User $student, Offre $offre): array
+    public function calculate(User $student, Offre $offre): ?array
     {
+        $cvText = trim($student->cv_text ?? '');
+        
+        // If the student has literally no CV text and no skills, don't generate a fake score
+        if (empty($cvText) && $student->skills->isEmpty()) {
+            OffreMatch::where('student_id', $student->id)->where('offre_id', $offre->id)->delete();
+            return null;
+        }
+
         $details = [];
         $totalScore = 0.0;
 
@@ -62,46 +78,50 @@ class MatchingService
         ];
     }
 
+    private function extractSkillsFromText(string $text): array
+    {
+        $text = strtolower($text);
+        return array_values(array_filter(self::SKILL_DICT, function($w) use ($text) {
+            $quoted = preg_quote($w, '/');
+            return preg_match('/(?<![a-z0-9])' . $quoted . '(?![a-z0-9])/i', $text);
+        }));
+    }
+
     private function calculateSkillsScore(User $student, Offre $offre, int $maxWeight, array &$details): float
     {
         // Get the required skills set by the company
-        $offerSkills = $offre->skills()->pluck('name', 'skills.id')->toArray();
+        $offerSkillsRel = $offre->skills()->pluck('name')->toArray();
+        $offerSkillsNLP = $this->extractSkillsFromText($offre->description . ' ' . $offre->titre);
+        $offerSkills = array_unique(array_merge($offerSkillsRel, $offerSkillsNLP));
+        $offerSkills = array_map('strtolower', $offerSkills);
         
         // Get the skills possessed by the student
-        $studentSkills = $student->skills->pluck('pivot.level', 'id')->toArray();
+        $studentSkillsRel = $student->skills->pluck('name')->toArray();
+        $studentSkillsNLP = $this->extractSkillsFromText($student->cv_text ?? '');
+        $studentSkills = array_unique(array_merge($studentSkillsRel, $studentSkillsNLP));
+        $studentSkills = array_map('strtolower', $studentSkills);
 
-        // If offer doesn't strictly require any skills, assume perfect match to not penalize
         if (empty($offerSkills)) {
+            $score = empty($studentSkills) ? $maxWeight * 0.5 : $maxWeight;
             $details['skills'] = [
-                'score' => $maxWeight,
+                'score' => $score,
                 'reason' => "L'offre ne liste aucune compétence technique spécifique.",
                 'matched' => [],
                 'missing' => []
             ];
-            return $maxWeight;
+            return $score;
         }
 
-        $matchedNames = [];
-        $missingNames = [];
-        $scoreEarned = 0;
+        $matchedNames = array_intersect($offerSkills, $studentSkills);
+        $missingNames = array_diff($offerSkills, $studentSkills);
         
-        $pointsPerSkill = $maxWeight / count($offerSkills);
-
-        foreach ($offerSkills as $id => $name) {
-            if (isset($studentSkills[$id])) {
-                $matchedNames[] = $name;
-                // Currently just awarding full points per matched skill regardless of level.
-                // Could be advanced further by multiplying by $studentSkill->levelWeight()
-                $scoreEarned += $pointsPerSkill; 
-            } else {
-                $missingNames[] = $name;
-            }
-        }
+        $matchRatio = count($matchedNames) / count($offerSkills);
+        $scoreEarned = $matchRatio * $maxWeight;
 
         $details['skills'] = [
             'score' => round($scoreEarned, 2),
             'reason' => count($matchedNames) . " compétence(s) en commun sur " . count($offerSkills) . " requise(s).",
-            'matched' => $matchedNames,
+            'matched' => array_values($matchedNames),
             'missing' => array_values($missingNames)
         ];
 
@@ -111,7 +131,7 @@ class MatchingService
     private function calculateLevelScore(User $student, Offre $offre, int $maxWeight, array &$details): float
     {
         if (empty($offre->level_required)) {
-            $score = $maxWeight;
+            $score = $maxWeight * 0.5; // Neutral score when not specified
             $details['level'] = ['score' => $score, 'reason' => "Aucun niveau minimal spécifié par l'offre."];
             return $score;
         }
@@ -123,7 +143,7 @@ class MatchingService
             $score = (float) $maxWeight;
             $reason = "Niveau '$reqLevel' détecté dans le profil/CV.";
         } else {
-            $score = $maxWeight * 0.5; // Partial points since CV formats vary wildly
+            $score = 0; // Strict penalty for not having the level
             $reason = "Niveau '$reqLevel' non repéré explicitement dans le CV.";
         }
 
@@ -134,8 +154,9 @@ class MatchingService
     private function calculateLocationScore(User $student, Offre $offre, int $maxWeight, array &$details): float
     {
         if (empty($offre->lieu)) {
-             $details['location'] = ['score' => $maxWeight, 'reason' => "Lieu non spécifié ou offre possiblement en télétravail."];
-             return $maxWeight;
+             $score = $maxWeight * 0.5;
+             $details['location'] = ['score' => $score, 'reason' => "Lieu non spécifié ou offre possiblement en télétravail."];
+             return $score;
         }
 
         $cvText = strtolower($student->cv_text ?? '');
@@ -147,7 +168,7 @@ class MatchingService
             $score = (float) $maxWeight;
             $reason = "Localisation compatible avec '$offLieu'.";
         } else {
-            $score = $maxWeight * 0.5;
+            $score = 0;
             $reason = "La localisation pourrait être un obstacle (à confirmer).";
         }
 
@@ -158,8 +179,9 @@ class MatchingService
     private function calculatePreferencesScore(User $student, Offre $offre, int $maxWeight, array &$details): float
     {
         if (empty($offre->type)) {
-             $details['preferences'] = ['score' => $maxWeight, 'reason' => "Type de stage ouvert ou non restrictif."];
-             return $maxWeight;
+             $score = $maxWeight * 0.5;
+             $details['preferences'] = ['score' => $score, 'reason' => "Type de stage ouvert ou non restrictif."];
+             return $score;
         }
 
         $cvText = strtolower($student->cv_text ?? '');
@@ -178,7 +200,7 @@ class MatchingService
             $score = (float) $maxWeight;
             $reason = "Le type de stage '$offre->type' correspond au profil.";
         } else {
-            $score = $maxWeight * 0.5;
+            $score = 0;
             $reason = "Le format '$offre->type' n'est pas explicitement demandé dans le CV.";
         }
         
@@ -202,10 +224,10 @@ class MatchingService
             $score = (float) $maxWeight;
             $reason = "Expérience avérée (projets/portfolio détectés).";
         } elseif ($foundCount == 1) {
-            $score = $maxWeight * 0.7;
+            $score = $maxWeight * 0.5;
             $reason = "Quelques indices d'expérience pratique détectés.";
         } else {
-            $score = $maxWeight * 0.3;
+            $score = 0;
             $reason = "Peu de références à des projets concrets dans le CV.";
         }
 

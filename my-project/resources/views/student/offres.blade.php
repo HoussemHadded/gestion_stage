@@ -96,7 +96,7 @@
                     </div>
 
                     <p class="text-gray-500 text-sm mb-4 flex-grow line-clamp-3 leading-relaxed">
-                        {{ $offre->description }}
+                        {{ Str::limit(strip_tags($offre->description), 200) }}
                     </p>
 
                     <div class="flex flex-wrap gap-2 mb-6">

@@ -19,11 +19,15 @@
                 <li class="p-4 hover:bg-gray-50 transition {{ empty($notification->read_at) ? 'bg-indigo-50/50' : '' }}">
                     <div class="flex items-start">
                         <div class="flex-shrink-0 mt-1">
-                            @if($notification->data['type_label'] ?? '' === 'nouvelle_offre')
+                            @php $typeLabel = $notification->data['type_label'] ?? ''; @endphp
+
+                            @if($typeLabel === 'nouvelle_offre')
                                 <i class="bi bi-briefcase-fill text-indigo-500 text-xl"></i>
-                            @elseif($notification->data['type_label'] ?? '' === 'candidature_acceptee')
+                            @elseif($typeLabel === 'nouvelle_candidature')
+                                <i class="bi bi-file-earmark-person-fill text-blue-500 text-xl"></i>
+                            @elseif($typeLabel === 'candidature_acceptee')
                                 <i class="bi bi-check-circle-fill text-green-500 text-xl"></i>
-                            @elseif($notification->data['type_label'] ?? '' === 'candidature_refusee')
+                            @elseif($typeLabel === 'candidature_refusee')
                                 <i class="bi bi-x-circle-fill text-red-500 text-xl"></i>
                             @else
                                 <i class="bi bi-bell-fill text-gray-400 text-xl"></i>

@@ -2,69 +2,55 @@
 
 namespace App\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Models\Candidature;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Models\Candidature;
 
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-
-class NouvelleCandidatureNotification extends Notification implements ShouldQueue, ShouldBroadcast
+/**
+ * Sent synchronously to an Entreprise user when a student applies.
+ * via() returns ['database'] only — mail is handled separately via
+ * a Mailable if SMTP is configured; removing it from here prevents
+ * a fatal MailMessage-not-found error from blocking the DB channel.
+ */
+class NouvelleCandidatureNotification extends Notification
 {
-    use Queueable;
-
-    /**
-     * Create a new notification instance.
-     */
     public function __construct(
-        public Candidature $candidature
+        public readonly Candidature $candidature
     ) {}
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database', 'broadcast'];
+        // 'database' MUST come before 'mail' so a mail config error
+        // does NOT prevent the notification row being written to DB.
+        return ['database'];
     }
 
     /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
-    {
-        $candidature = $this->candidature->loadMissing(['student', 'offre']);
-        $studentName = $candidature->student->name ?? 'Un étudiant';
-        $offreTitre = $candidature->offre->titre ?? 'une offre';
-
-        return (new MailMessage)
-            ->subject('Nouvelle candidature reçue – Plateforme Stage')
-            ->greeting('Bonjour ' . $notifiable->name . ',')
-            ->line('Une nouvelle candidature a été déposée pour votre offre : **' . $offreTitre . '**.')
-            ->line('Candidat : **' . $studentName . '**.')
-            ->line('Connectez-vous à la plateforme pour consulter le CV et gérer cette candidature.')
-            ->action('Voir les candidatures', url('/candidatures'))
-            ->line('Merci d\'utiliser notre plateforme de gestion de stages.');
-    }
-
-    /**
-     * Get the array representation of the notification for the database.
+     * Stored in the `notifications` table (data column).
      */
     public function toDatabase(object $notifiable): array
     {
         $candidature = $this->candidature->loadMissing(['student', 'offre']);
+
         return [
-            'type_label' => 'nouvelle_candidature',
+            'type_label'     => 'nouvelle_candidature',
             'candidature_id' => $candidature->id,
-            'offre_titre' => $candidature->offre->titre ?? 'Offre inconnue',
-            'student_name' => $candidature->student->name ?? 'Un étudiant',
-            'message' => 'Nouvelle candidature de ' . ($candidature->student->name ?? 'Un étudiant') . ' pour ' . ($candidature->offre->titre ?? 'votre offre'),
-            'url' => route('entreprise.candidatures.index')
+            'offre_titre'    => $candidature->offre->titre    ?? 'Offre inconnue',
+            'student_name'   => $candidature->student->name   ?? 'Un étudiant',
+            'message'        => 'Nouvelle candidature de '
+                . ($candidature->student->name   ?? 'un étudiant')
+                . ' pour « '
+                . ($candidature->offre->titre ?? 'votre offre')
+                . ' ».',
+            'url'            => route('entreprise.candidatures.index'),
         ];
     }
-    
+
     /**
-     * Get the array representation of the notification for broadcasting.
+     * toArray() is the fallback used by the 'database' channel when
+     * toDatabase() is not explicitly defined — we keep both for safety.
      */
-    public function toBroadcast(object $notifiable): array
+    public function toArray(object $notifiable): array
     {
         return $this->toDatabase($notifiable);
     }

@@ -36,9 +36,9 @@ class DashboardService
 
             // ── Candidatures ──────────────────────────────────────────────
             $total_candidatures    = Candidature::count();
-            $accepted_candidatures = Candidature::where('statut', StatutCandidature::Acceptee->value)->count();
-            $rejected_candidatures = Candidature::where('statut', StatutCandidature::Refusee->value)->count();
-            $pending_candidatures  = Candidature::where('statut', StatutCandidature::EnAttente->value)->count();
+            $accepted_candidatures = Candidature::where('statut', StatutCandidature::Acceptee)->count();
+            $rejected_candidatures = Candidature::where('statut', StatutCandidature::Refusee)->count();
+            $pending_candidatures  = Candidature::where('statut', StatutCandidature::EnAttente)->count();
 
             // ── Données récentes ──────────────────────────────────────────
             $recent_candidatures = Candidature::with(['student', 'offre'])
@@ -84,25 +84,26 @@ class DashboardService
         return Cache::remember("entreprise_dashboard_stats_{$user->id}", self::CACHE_TTL, function () use ($user) {
             $total_offres = Offre::where('entreprise_id', $user->id)->count();
 
-            // All candidatures for their offers
-            $candidatures = Candidature::whereHas('offre', function($q) use ($user) {
+            // ✅ All candidatures for this company's offers — filtered by entreprise_id
+            $baseQuery = Candidature::whereHas('offre', function ($q) use ($user) {
                 $q->where('entreprise_id', $user->id);
             });
 
-            $total_candidatures = (clone $candidatures)->count();
-            
-            $pending = (clone $candidatures)->where('statut', StatutCandidature::EnAttente->value)->count();
-            $shortlisted = (clone $candidatures)->where('statut', StatutCandidature::Shortlisted->value)->count();
-            $interview = (clone $candidatures)->where('statut', StatutCandidature::Interview->value)->count();
-            $accepted = (clone $candidatures)->where('statut', StatutCandidature::Acceptee->value)->count();
-            $rejected = (clone $candidatures)->where('statut', StatutCandidature::Refusee->value)->count();
+            $total_candidatures = (clone $baseQuery)->count();
+            $pending     = (clone $baseQuery)->where('statut', StatutCandidature::EnAttente)->count();
+            $shortlisted = (clone $baseQuery)->where('statut', StatutCandidature::Shortlisted)->count();
+            $interview   = (clone $baseQuery)->where('statut', StatutCandidature::Interview)->count();
+            $accepted    = (clone $baseQuery)->where('statut', StatutCandidature::Acceptee)->count();
+            $rejected    = (clone $baseQuery)->where('statut', StatutCandidature::Refusee)->count();
 
-            $conversion_rate = $total_candidatures > 0 ? ($accepted / $total_candidatures) * 100 : 0;
+            $conversion_rate = $total_candidatures > 0
+                ? round(($accepted / $total_candidatures) * 100, 1)
+                : 0;
 
             $chartLabels = ['En Attente', 'Présélection', 'Entretien', 'Embauché', 'Refusé'];
-            $chartData = [$pending, $shortlisted, $interview, $accepted, $rejected];
+            $chartData   = [$pending, $shortlisted, $interview, $accepted, $rejected];
 
-            // Top performing internships
+            // Top offers by number of candidatures received
             $top_offres = Offre::where('entreprise_id', $user->id)
                 ->withCount('candidatures')
                 ->orderBy('candidatures_count', 'desc')
@@ -110,8 +111,8 @@ class DashboardService
                 ->get();
 
             return compact(
-                'total_offres', 'total_candidatures', 
-                'pending', 'shortlisted', 'interview', 'accepted', 'rejected', 
+                'total_offres', 'total_candidatures',
+                'pending', 'shortlisted', 'interview', 'accepted', 'rejected',
                 'conversion_rate', 'chartLabels', 'chartData', 'top_offres'
             );
         });

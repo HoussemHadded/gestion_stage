@@ -70,8 +70,8 @@
                         </div>
                         <div class="flex flex-col text-right">
                             <span class="text-xs text-gray-500 font-medium">Statut Actuel</span>
-                            <span class="font-bold text-sm {{ $candidature->statut->colorClass() }}">
-                                {{ $candidature->statut->label() }}
+                            <span class="font-bold text-sm {{ $candidature->statut?->colorClass() ?? 'text-gray-500' }}">
+                                {{ $candidature->statut?->label() ?? 'Inconnu' }}
                             </span>
                         </div>
                     </div>

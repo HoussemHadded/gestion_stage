@@ -42,6 +42,10 @@ class MatchController extends Controller
         // Use service to calculate and store the score
         $result = $this->matchingService->calculate($student, $offre);
 
+        if (!$result) {
+            return back()->with('error', 'Veuillez remplir votre profil ou ajouter des compétences pour calculer le match.');
+        }
+
         // Fetch the created/updated match record with its casts applied
         $match = OffreMatch::find($result['match_id']);
 

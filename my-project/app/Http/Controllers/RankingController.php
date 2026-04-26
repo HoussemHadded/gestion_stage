@@ -20,7 +20,7 @@ class RankingController extends Controller
     public function index()
     {
         // Get top 20 students globally
-        $topStudents = $this->rankingService->getTopStudents(20);
+        $topStudents = $this->rankingService->getTopCandidates(20);
         
         return view('ranking.index', compact('topStudents'));
     }

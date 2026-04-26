@@ -55,7 +55,7 @@
                     @endif
                 </div>
                 
-                <p class="text-sm text-gray-600 mb-4 line-clamp-2">{{ $offre->description }}</p>
+                <p class="text-sm text-gray-600 mb-4 line-clamp-2">{{ Str::limit(strip_tags($offre->description), 150) }}</p>
                 
                 <div class="text-xs text-gray-500 space-y-1 mb-4">
                     <p><i class="bi bi-geo-alt mr-1"></i>{{ $offre->lieu ?? 'Lieu non spécifié' }}</p>

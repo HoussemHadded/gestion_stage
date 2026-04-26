@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Candidature;
 use App\Models\Offre;
-use App\Http\Requests\Student\StoreCandidatureRequest;
+use App\Enums\UserRole;
 use App\Services\CandidatureService;
+use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
 
 class CandidatureController extends Controller
@@ -32,15 +34,26 @@ class CandidatureController extends Controller
         return view('student.candidatures', compact('candidatures'));
     }
 
-    public function store(\Illuminate\Http\Request $request, $id)
+    public function store(Request $request, $id): RedirectResponse
     {
         \Illuminate\Support\Facades\Log::info("Tentative de postuler à l'offre $id", ['user_id' => auth()->id()]);
-        // Replace isStudent() with strict role check requested by user
-        if (auth()->user()->role->value !== 'student') {
-            abort(403, 'Accès non autorisé.');
+
+        // ✅ FIX: The route is already protected by role:etudiant middleware.
+        // Manual check must use the correct enum value 'etudiant', not 'student'.
+        // We use the isEtudiant() helper for clean, maintainable code.
+        $user = auth()->user();
+        if (! $user->isEtudiant()) {
+            return back()->with('error', 'Seuls les étudiants peuvent postuler à une offre.');
         }
 
-        $alreadyApplied = Candidature::where('student_id', auth()->id())
+        // Ensure the offer exists
+        $offre = Offre::find($id);
+        if (! $offre) {
+            return back()->with('error', "L'offre demandée n'existe pas ou a été supprimée.");
+        }
+
+        // Prevent duplicate applications
+        $alreadyApplied = Candidature::where('student_id', $user->id)
             ->where('offre_id', $id)
             ->exists();
 
@@ -48,25 +61,25 @@ class CandidatureController extends Controller
             return back()->with('error', 'Vous avez déjà postulé à cette offre.');
         }
 
-        // Pass only the strictly required fields to the service
-        // CandidatureService will automatically inject the correct Enum STATUS and DATE
         $this->candidatureService->store([
-            'student_id' => auth()->id(),
-            'offre_id' => $id,
-            'cv' => 'Candidature simplifiée',
-            'cv_version' => 'original',
+            'student_id'  => $user->id,
+            'offre_id'    => $id,
+            'cv'          => 'Candidature simplifiée',
+            'cv_version'  => 'original',
         ]);
 
-        return back()->with('success', 'Candidature envoyée avec succès');
+        return back()->with('success', 'Candidature envoyée avec succès !');
     }
 
-    public function applyOptimized(\Illuminate\Http\Request $request, Offre $offre)
+    public function applyOptimized(Request $request, Offre $offre): RedirectResponse
     {
-        if (auth()->user()->role->value !== 'student') {
-            abort(403, 'Accès non autorisé.');
+        $user = auth()->user();
+
+        if (! $user->isEtudiant()) {
+            return back()->with('error', 'Seuls les étudiants peuvent postuler à une offre.');
         }
 
-        $alreadyApplied = Candidature::where('student_id', auth()->id())
+        $alreadyApplied = Candidature::where('student_id', $user->id)
             ->where('offre_id', $offre->id)
             ->exists();
 
@@ -75,9 +88,9 @@ class CandidatureController extends Controller
         }
 
         $this->candidatureService->store([
-            'student_id' => auth()->id(),
-            'offre_id' => $offre->id,
-            'cv' => "CV Optimisé via IA", // Simulated file path/name
+            'student_id' => $user->id,
+            'offre_id'   => $offre->id,
+            'cv'         => 'CV Optimisé via IA',
             'cv_version' => 'optimized',
         ]);
 
