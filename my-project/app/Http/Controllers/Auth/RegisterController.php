@@ -21,12 +21,31 @@ class RegisterController extends Controller
 
     public function register(RegisterRequest $request)
     {
-        $user = $this->userService->store($request->validated());
+        \Illuminate\Support\Facades\Log::info('[RegisterController] Registration flow started', [
+            'payload' => $request->except(['password', 'password_confirmation']),
+        ]);
 
-        Auth::login($user);
+        try {
+            $user = $this->userService->store($request->validated());
 
-        $request->session()->regenerate();
+            if (!$user || !$user->id) {
+                \Illuminate\Support\Facades\Log::error('[RegisterController] User not inserted or ID missing');
+                return back()->withInput()->withErrors(['error' => 'Erreur lors de la création du compte.']);
+            }
 
-        return redirect()->route('dashboard');
+            Auth::login($user);
+
+            $request->session()->regenerate();
+
+            \Illuminate\Support\Facades\Log::info('[RegisterController] Registration successful, user logged in', ['user_id' => $user->id]);
+
+            return redirect()->route('dashboard');
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('[RegisterController] Registration exception: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->withInput()->withErrors(['error' => 'Une erreur est survenue lors de l\'inscription.']);
+        }
     }
 }

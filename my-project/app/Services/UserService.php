@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 
 class UserService
 {
@@ -13,8 +15,38 @@ class UserService
 
     public function store(array $data): User
     {
+        // Remove confirmation field — it must not reach the DB layer
+        unset($data['password_confirmation']);
+
+        // Hash password explicitly (model cast removed to avoid double-hashing)
         $data['password'] = Hash::make($data['password']);
-        $user = User::create($data);
+
+        Log::info('[UserService] About to insert user into database', [
+            'payload' => Arr::except($data, ['password']),
+        ]);
+
+        try {
+            $user = User::create($data);
+        } catch (\Throwable $e) {
+            Log::error('[UserService] User::create() failed', [
+                'error'   => $e->getMessage(),
+                'payload' => Arr::except($data, ['password']),
+            ]);
+            throw $e;
+        }
+
+        if (! $user->exists || ! $user->id) {
+            Log::error('[UserService] User::create() returned without a persisted ID', [
+                'payload' => Arr::except($data, ['password']),
+            ]);
+            throw new \RuntimeException('Registration failed: user was not inserted into the database.');
+        }
+
+        Log::info('[UserService] New user successfully inserted into database', [
+            'id'    => $user->id,
+            'email' => $user->email,
+            'role'  => $user->role,
+        ]);
 
         $this->cacheService->forgetUsers();
 
