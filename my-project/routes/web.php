@@ -39,9 +39,12 @@ Route::middleware(['auth'])->group(function () {
     // Classement Étudiants (commun à tous)
     Route::get('/ranking/students', [\App\Http\Controllers\RankingController::class, 'index'])->name('ranking.students');
 
-    // Assistant IA Global
-    Route::post('/assistant/chat', [\App\Http\Controllers\AssistantController::class, 'chat'])->name('assistant.chat');
 });
+
+// Assistant IA Global
+Route::post('/assistant/chat', [\App\Http\Controllers\AssistantController::class, 'chat'])
+    ->middleware('throttle:20,1')
+    ->name('assistant.chat');
 
 /*
 |--------------------------------------------------------------------------
@@ -54,6 +57,21 @@ Route::middleware('auth.guest')->group(function () {
 
     Route::get('/register', [Auth\RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register',[Auth\RegisterController::class, 'register']);
+
+    // Password reset
+    Route::get('/forgot-password', [Auth\PasswordResetController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('/forgot-password', [Auth\PasswordResetController::class, 'sendResetLinkEmail'])
+        ->middleware('throttle:5,1')
+        ->name('password.email');
+    Route::get('/reset-password/{token}', [Auth\PasswordResetController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [Auth\PasswordResetController::class, 'reset'])
+        ->middleware('throttle:5,1')
+        ->name('password.update');
+
+    // AI password reset endpoint
+    Route::post('/ai/send-reset', [Auth\PasswordResetController::class, 'sendResetLinkEmail'])
+        ->middleware('throttle:5,1')
+        ->name('ai.send-reset');
 });
 
 // Déconnexion

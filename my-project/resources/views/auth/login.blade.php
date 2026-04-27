@@ -46,6 +46,7 @@
                    {{ old('remember') ? 'checked' : '' }}>
             <span class="ml-2 text-sm text-gray-300">Se souvenir de moi</span>
         </label>
+        <a href="{{ route('password.request') }}" class="text-sm text-indigo-300 hover:text-indigo-200 transition">Mot de passe oublie ?</a>
     </div>
 
     <button type="submit" id="btn-login" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-gray-900 transition-all transform hover:-translate-y-0.5">
