@@ -56,6 +56,9 @@
                             {{-- Actions Admin --}}
                             @if(auth()->user()->isAdmin())
                                 <td class="text-center">
+                                    <a href="{{ route('offres.show', $offre->id) }}" class="btn btn-sm btn-outline-info btn-action" title="Voir">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
                                     <a href="{{ route('admin.offres.edit', $offre->id) }}" class="btn btn-sm btn-warning btn-action">
                                         <i class="bi bi-pencil-square"></i> Modifier
                                     </a>
@@ -73,6 +76,9 @@
                             {{-- Actions Entreprise --}}
                             @if(auth()->user()->isEntreprise())
                                 <td class="text-center">
+                                    <a href="{{ route('offres.show', $offre->id) }}" class="btn btn-sm btn-outline-info btn-action" title="Voir">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
                                     <a href="{{ route('entreprise.offres.edit', $offre->id) }}" class="btn btn-sm btn-warning btn-action">
                                         <i class="bi bi-pencil-square"></i> Modifier
                                     </a>

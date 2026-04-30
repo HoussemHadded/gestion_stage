@@ -9,6 +9,7 @@ use App\Http\Controllers\Company;
 use App\Http\Controllers\Entreprise;
 use App\Http\Controllers\Encadrant;
 use App\Http\Controllers\Auth;
+use App\Http\Controllers\OffreController;
 use App\Http\Controllers\DashboardController;
 
 /*
@@ -19,6 +20,9 @@ use App\Http\Controllers\DashboardController;
 | Auth    → /dashboard (qui redirige selon le rôle)
 */
 Route::view('/', 'landing')->name('home');
+
+// Route unifiée pour voir une offre (Accessible par tous les utilisateurs auth)
+Route::get('/offres/{offre}', [OffreController::class, 'show'])->middleware('auth')->name('offres.show');
 
 /*
 |--------------------------------------------------------------------------
@@ -172,7 +176,6 @@ Route::middleware(['auth', 'role:etudiant'])
 
         // Consulter les offres (via contrôleur dédié)
         Route::get('/offres',       [Student\OffreController::class, 'index'])->name('offres.index');
-        Route::get('/offres/{id}',  [Student\OffreController::class, 'show'])->name('offres.show');
 
         // Candidatures & Favoris
         Route::get('/candidatures',          [Student\CandidatureController::class, 'index'])->name('candidatures.index');

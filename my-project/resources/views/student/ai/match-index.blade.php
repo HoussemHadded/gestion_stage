@@ -72,7 +72,7 @@
             </div>
             
             <div class="bg-gray-50 px-5 py-3 border-t border-gray-100 flex justify-between items-center">
-                <a href="{{ route('student.offres.show', $offre->id) }}" class="text-sm text-gray-600 hover:text-gray-900 font-medium">
+                <a href="{{ route('offres.show', $offre->id) }}" class="text-sm text-gray-600 hover:text-gray-900 font-medium">
                     Voir détails
                 </a>
                 

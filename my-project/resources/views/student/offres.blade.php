@@ -117,7 +117,7 @@
                             IL Y A {{ $offre->date_publication ? \Carbon\Carbon::parse($offre->date_publication)->diffForHumans(null, true) : '...' }}
                         </span>
                         
-                        <a href="{{ route('student.offres.show', $offre->id) }}" class="inline-flex items-center text-sm font-bold text-indigo-600 hover:text-purple-600 transition cursor-pointer">
+                        <a href="{{ route('offres.show', $offre->id) }}" class="inline-flex items-center text-sm font-bold text-indigo-600 hover:text-purple-600 transition cursor-pointer">
                             Voir l'offre <i class="bi bi-arrow-right ml-1"></i>
                         </a>
                     </div>

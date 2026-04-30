@@ -27,7 +27,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Paginator::useBootstrapFive();
+        Paginator::defaultView('vendor.pagination.premium');
+        Paginator::defaultSimpleView('vendor.pagination.simple-premium');
         \App\Models\User::observe(\App\Observers\UserObserver::class);
     }
 }

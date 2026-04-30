@@ -120,7 +120,9 @@
                     @forelse($candidatures as $candidature)
                         <tr>
                             <td class="px-3 py-3 text-sm text-gray-900 font-medium">
-                                {{ $candidature->offre->titre }}
+                                <a href="{{ route('offres.show', $candidature->offre->id) }}" class="text-indigo-600 hover:text-indigo-900 transition">
+                                    {{ $candidature->offre->titre }}
+                                </a>
                             </td>
                             <td class="px-3 py-3 text-sm text-gray-500">
                                 {{ $candidature->offre->entreprise->name ?? 'N/A' }}
