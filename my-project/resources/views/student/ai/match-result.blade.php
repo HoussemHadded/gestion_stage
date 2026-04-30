@@ -58,6 +58,16 @@
                     </div>
                 </div>
 
+                @if(!empty($match->details['boost_applied']))
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        @foreach($match->details['boost_applied'] as $boost)
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black bg-indigo-600 text-white shadow-sm">
+                                <i class="bi bi-lightning-fill mr-1 text-yellow-300"></i> {{ mb_strtoupper($boost) }}
+                            </span>
+                        @endforeach
+                    </div>
+                @endif
+
                 <div class="bg-gray-50 p-5 rounded-lg border border-gray-100 mb-6 flex-grow">
                     <h3 class="flex items-center font-bold text-gray-800 mb-3">
                         <i class="bi bi-robot text-indigo-500 mr-2 text-xl"></i> Analyse de l'IA
@@ -76,27 +86,21 @@
 <h2 class="text-xl font-bold text-gray-900 mb-4 border-b border-gray-200 pb-2">Détails de l'évaluation</h2>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    @foreach([
-        ['key' => 'skills', 'label' => 'Compétences Techniques', 'icon' => 'bi-code-slash', 'color' => 'text-blue-500'],
-        ['key' => 'level', 'label' => 'Niveau d\'études', 'icon' => 'bi-mortarboard', 'color' => 'text-green-500'],
-        ['key' => 'projects', 'label' => 'Projets & Expérience', 'icon' => 'bi-briefcase', 'color' => 'text-purple-500'],
-        ['key' => 'preferences', 'label' => 'Critères de stage', 'icon' => 'bi-sliders', 'color' => 'text-yellow-500'],
-        ['key' => 'location', 'label' => 'Localisation', 'icon' => 'bi-geo-alt', 'color' => 'text-red-500']
+@foreach([
+        ['key' => 'skills', 'label' => 'Compétences Clés', 'icon' => 'bi-code-slash', 'color' => 'text-blue-500', 'max' => 40],
+        ['key' => 'experience', 'label' => 'Pertinence Expérience', 'icon' => 'bi-briefcase', 'color' => 'text-purple-500', 'max' => 25],
+        ['key' => 'keywords', 'label' => 'Mots-clés & Intention', 'icon' => 'bi-search', 'color' => 'text-yellow-500', 'max' => 15],
+        ['key' => 'level', 'label' => 'Niveau d\'études', 'icon' => 'bi-mortarboard', 'color' => 'text-green-500', 'max' => 10],
+        ['key' => 'tools', 'label' => 'Outils & Technologies', 'icon' => 'bi-tools', 'color' => 'text-indigo-500', 'max' => 10]
     ] as $crit)
         @php
             $data = $match->details[$crit['key']] ?? null;
             if(!$data) continue;
             
             $subScore = $data['score'] ?? 0;
-            // Normalize subscore colors based on arbitrary heuristic (green if > 70% of max allowed)
-            // Since we know max weights from service: skills 50, level 20, projects 10, pref 10, loc 10
-            $max = match($crit['key']) {
-                'skills' => 50,
-                'level' => 20,
-                default => 10
-            };
+            $max = $crit['max'];
             $percent = $max > 0 ? ($subScore / $max) * 100 : 0;
-            $barColor = $percent >= 70 ? 'bg-green-500' : ($percent >= 40 ? 'bg-yellow-400' : 'bg-red-500');
+            $barColor = $percent >= 75 ? 'bg-green-500' : ($percent >= 40 ? 'bg-yellow-400' : 'bg-red-500');
         @endphp
         
         <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-col">
@@ -109,17 +113,17 @@
             
             <!-- Progress Bar -->
             <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
-                <div class="{{ $barColor }} h-2 rounded-full" style="width: {{ $percent }}%"></div>
+                <div class="{{ $barColor }} h-2 rounded-full transition-all duration-1000" style="width: {{ $percent }}%"></div>
             </div>
             
             <p class="text-sm text-gray-600 flex-grow">{{ $data['reason'] ?? '' }}</p>
 
             @if($crit['key'] === 'skills' && !empty($data['matched']))
                 <div class="mt-3">
-                    <strong class="text-xs text-green-700 block mb-1">✓ Acquis :</strong>
+                    <strong class="text-xs text-green-700 block mb-1">✓ Match :</strong>
                     <div class="flex flex-wrap gap-1">
                         @foreach($data['matched'] as $s)
-                            <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded border border-green-200">{{ $s }}</span>
+                            <span class="text-[10px] bg-green-50 text-green-700 px-2 py-0.5 rounded border border-green-200 font-bold uppercase">{{ $s }}</span>
                         @endforeach
                     </div>
                 </div>
@@ -130,7 +134,7 @@
                     <strong class="text-xs text-red-700 block mb-1">✗ Manquants :</strong>
                     <div class="flex flex-wrap gap-1">
                         @foreach($data['missing'] as $s)
-                            <span class="text-xs bg-red-50 text-red-700 px-2 py-0.5 rounded border border-red-200">{{ $s }}</span>
+                            <span class="text-[10px] bg-red-50 text-red-700 px-2 py-0.5 rounded border border-red-200 font-bold uppercase">{{ $s }}</span>
                         @endforeach
                     </div>
                 </div>
